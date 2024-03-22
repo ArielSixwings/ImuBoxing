@@ -1,0 +1,28 @@
+# Build folder and its contents
+build/
+
+# Common build artifacts (adjust as needed)
+*.o
+*.a
+*.so
+*.dll
+*.lib
+
+# IDE-specific build artifacts (uncomment relevant lines)
+# Visual Studio
+*.vcxproj
+*.vcxproj.user
+*.sln
+*.suo
+*.pdb
+
+# Xcode
+build/
+*.pbxproj
+
+CMakeFiles/
+*.pbxproj
+
+# Makefiles
+Makefile
+# You can add patterns for other build systems here

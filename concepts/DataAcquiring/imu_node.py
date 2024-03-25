@@ -22,7 +22,7 @@ class IMUNode(Node):
 
     def __init__(self):
         super().__init__('imu_node')
-        self.publisher_ = self.create_publisher(Float64, 'imu/crank_angle', 1)
+        self.publisher_ = self.create_publisher(Vector3, 'imu/angles', 1)
         timer_period = 0.005 # seconds 1/fs
         cb_group =  ReentrantCallbackGroup()
         
@@ -74,14 +74,17 @@ class IMUNode(Node):
                     euler_vector = np.array(euler_vector, dtype=np.float64)
                     
                     # pitch, yaw, roll
-                    # msg = Vector3()
+                    msg = Vector3()
+                    msg.x = euler_vector[0]
+                    msg.y = euler_vector[1]
+                    msg.z = euler_vector[2]
                     # msg.x = 0.0#rad2deg(euler_vector[0])
                     # msg.y = self.rad2deg(euler_vector[1])
                     # msg.y = self.fix_angle_quadrant(msg.y)
                     # msg.z = 0.0#rad2deg(euler_vector[2])
-                    msg = Float64()
-                    msg.data = self.rad2deg(euler_vector[1])
-                    msg.data = self.fix_angle_quadrant(msg.data)
+                    # msg = Float64()
+                    # msg.data = self.rad2deg(euler_vector[1])
+                    # msg.data = self.fix_angle_quadrant(msg.data)
 
                     self.publisher_.publish(msg)
 

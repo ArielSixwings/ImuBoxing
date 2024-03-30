@@ -24,7 +24,10 @@ if(BUILD_TESTING)
   ament_lint_auto_find_test_dependencies()
 endif()
 
-add_executable(ImuNode src/ImuNode.cpp src/main.cpp)  # Add main.cpp here
+add_executable(ImuNode src/ImuNode.cpp
+                       src/SpaceSensor.cpp 
+                       src/main.cpp)
+
 ament_target_dependencies(ImuNode rclcpp geometry_msgs std_srvs)
 target_link_libraries(ImuNode Boost::system Boost::thread)
 install(TARGETS

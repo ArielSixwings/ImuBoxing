@@ -4,7 +4,7 @@ int main(int argc, char * argv[]) {
     rclcpp::init(argc, argv);
 
     try {
-        auto node = std::make_shared<ImuNode>();
+        auto node = std::make_shared<telemetry::ImuNode>();
         rclcpp::spin(node);
         node->CreateAnglesPublisher();
     } catch (const std::exception& e) {

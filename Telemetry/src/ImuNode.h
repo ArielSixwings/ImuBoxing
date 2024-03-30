@@ -21,6 +21,9 @@ namespace telemetry
 
         void TareSensor(const std::shared_ptr<std_srvs::srv::Empty::Request> request,
                             std::shared_ptr<std_srvs::srv::Empty::Response> response);
+        
+        void TareSensorQuaternion(const std::shared_ptr<std_srvs::srv::Empty::Request> request,
+                            std::shared_ptr<std_srvs::srv::Empty::Response> response);
 
         void ApplyCommand(const std::string& command, bool show_response = false);
 
@@ -38,6 +41,7 @@ namespace telemetry
         rclcpp::Service<std_srvs::srv::Empty>::SharedPtr m_startService;
         rclcpp::Service<std_srvs::srv::Empty>::SharedPtr m_stopService;
         rclcpp::Service<std_srvs::srv::Empty>::SharedPtr m_serviceTare;
+        rclcpp::Service<std_srvs::srv::Empty>::SharedPtr m_serviceTareQuaternion;
         
     };
 }

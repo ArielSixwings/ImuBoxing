@@ -25,6 +25,9 @@ namespace telemetry
         m_serviceTare = this->create_service<std_srvs::srv::Empty>(
             "imu/tare", std::bind(&ImuNode::TareSensor, this, std::placeholders::_1, std::placeholders::_2));
 
+        m_serviceTareQuaternion = this->create_service<std_srvs::srv::Empty>(
+            "imu/tareQuaternion", std::bind(&ImuNode::TareSensorQuaternion, this, std::placeholders::_1, std::placeholders::_2));
+
         auto timerCallback = [this]() -> void {
             // Placeholder for timer callback functionality
         };
@@ -49,10 +52,9 @@ namespace telemetry
         RCLCPP_INFO(this->get_logger(), "Start Streaming");
 
         std::vector<int> imuNumbers = {3};
-        int commandValue = 85;
 
         for (auto id : imuNumbers) {
-            auto command = SpaceSensor::CreateImuCommand(id, commandValue);
+            auto command = SpaceSensor::CreateImuCommand(id, SpaceSensor::Commands::StartStreaming);
             ApplyCommand(command);
         }
 
@@ -71,10 +73,9 @@ namespace telemetry
         RCLCPP_INFO(this->get_logger(), "Stop Streaming");
 
         std::vector<int> imuNumbers = {3};
-        int commandValue = 86;
 
         for (auto id : imuNumbers) {
-            auto command = SpaceSensor::CreateImuCommand(id, commandValue);
+            auto command = SpaceSensor::CreateImuCommand(id, SpaceSensor::Commands::StopStreaming);
             ApplyCommand(command);
         }
 
@@ -88,10 +89,24 @@ namespace telemetry
         RCLCPP_INFO(this->get_logger(), "Tare Sensor");
 
         std::vector<int> imuNumbers = {3};
-        int commandValue = 96;
 
         for (auto id : imuNumbers) {
-            auto command = SpaceSensor::CreateImuCommand(id, commandValue);
+            auto command = SpaceSensor::CreateImuCommand(id, SpaceSensor::Commands::TareWithCurrentOrientation);
+            ApplyCommand(command);
+        }
+
+    }
+
+    void ImuNode::TareSensorQuaternion([[maybe_unused]] const std::shared_ptr<std_srvs::srv::Empty::Request> request,
+                                       [[maybe_unused]] std::shared_ptr<std_srvs::srv::Empty::Response> response) 
+    {
+        
+        RCLCPP_INFO(this->get_logger(), "Tare Sensor Quaternion");
+
+        std::vector<int> imuNumbers = {3};
+
+        for (auto id : imuNumbers) {
+            auto command = SpaceSensor::CreateImuCommand(id, SpaceSensor::Commands::TareWithQuaternion);
             ApplyCommand(command);
         }
 
@@ -105,7 +120,7 @@ namespace telemetry
 
         if (showResponse) 
         {
-            std::vector<char> response_buffer(128); // Adjust size as needed
+            std::vector<char> response_buffer(128);
 
             size_t bytes_read = m_serialPort->read_some(boost::asio::buffer(response_buffer));
 

@@ -13,7 +13,13 @@ ImuNode::ImuNode() : Node("imuNode"), m_io()
     }
 
     m_startService = this->create_service<std_srvs::srv::Empty>(
-        "imu/start", std::bind(&ImuNode::StartStreaming, this, _1, _2));
+        "imu/start", std::bind(&ImuNode::StartStreaming, this, std::placeholders::_1, std::placeholders::_2));
+    
+    m_stopService = this->create_service<std_srvs::srv::Empty>(
+        "imu/stop", std::bind(&ImuNode::StopStreaming, this, std::placeholders::_1, std::placeholders::_2));
+
+    m_serviceTare = this->create_service<std_srvs::srv::Empty>(
+        "imu/tare", std::bind(&ImuNode::TareSensor, this, std::placeholders::_1, std::placeholders::_2));
 
     auto timerCallback = [this]() -> void {
         // Placeholder for timer callback functionality
@@ -52,13 +58,13 @@ void ImuNode::StartStreaming([[maybe_unused]] const std::shared_ptr<std_srvs::sr
 void ImuNode::StopStreaming([[maybe_unused]] const std::shared_ptr<std_srvs::srv::Empty::Request> request,
                              [[maybe_unused]] std::shared_ptr<std_srvs::srv::Empty::Response> response)  
 {
-    if (m_streaming) {
-        RCLCPP_WARN(this->get_logger(), "Already streaming");
+    if (not m_streaming) {
+        RCLCPP_WARN(this->get_logger(), "Already not streaming");
 
         return;
     }
 
-    RCLCPP_INFO(this->get_logger(), "Start Streaming");
+    RCLCPP_INFO(this->get_logger(), "Stop Streaming");
 
     std::vector<int> imuNumbers = {3};
     int commandValue = 86;
@@ -69,6 +75,22 @@ void ImuNode::StopStreaming([[maybe_unused]] const std::shared_ptr<std_srvs::srv
     }
 
     m_streaming = false;
+}
+
+void ImuNode::TareSensor([[maybe_unused]] const std::shared_ptr<std_srvs::srv::Empty::Request> request,
+                             [[maybe_unused]] std::shared_ptr<std_srvs::srv::Empty::Response> response) 
+{
+    
+    RCLCPP_INFO(this->get_logger(), "Tare Sensor");
+
+    std::vector<int> imuNumbers = {3};
+    int commandValue = 96;
+
+    for (auto id : imuNumbers) {
+        auto command = CreateImuCommand(id, commandValue);
+        ApplyCommand(command);
+    }
+
 }
 
 std::string ImuNode::CreateImuCommand(int logicalId,

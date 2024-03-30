@@ -12,11 +12,13 @@ class ImuNode : public rclcpp::Node {
 public:
     ImuNode();
 
+    void CreateAnglesPublisher();
+
 private:
     int imuNumber = 3;
     bool streaming = false;
     rclcpp::Publisher<geometry_msgs::msg::Vector3>::SharedPtr m_publisher;
-    std::shared_ptr<boost::asio::serial_port> serialPort;
-    boost::asio::io_service io; // Declare io object
+    std::shared_ptr<boost::asio::serial_port> m_serialPort;
+    boost::asio::io_service m_io; // Declare io object
     rclcpp::TimerBase::SharedPtr m_timer;
 };

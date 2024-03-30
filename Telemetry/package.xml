@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
-  <name>Telemetry</name>
+  <name>telemetry</name>
   <version>0.0.0</version>
   <description>TODO: Package description</description>
   <maintainer email="arielserafim@gmail.com">ariel</maintainer>
@@ -12,7 +12,6 @@
   <depend>rclcpp</depend>
   <depend>geometry_msgs</depend>
   <depend>std_srvs</depend>
-  <depend>serial</depend>
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>

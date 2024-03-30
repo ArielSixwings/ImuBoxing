@@ -17,6 +17,9 @@ public:
     void StartStreaming(const std::shared_ptr<std_srvs::srv::Empty::Request> request,
                         std::shared_ptr<std_srvs::srv::Empty::Response> response);
 
+    void StopStreaming(const std::shared_ptr<std_srvs::srv::Empty::Request> request,
+                        std::shared_ptr<std_srvs::srv::Empty::Response> response);
+
     void ApplyCommand(const std::string& command, bool show_response = false);
 
     static std::string CreateImuCommand( int logicalId,

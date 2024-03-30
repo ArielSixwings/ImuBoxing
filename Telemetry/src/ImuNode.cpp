@@ -49,6 +49,28 @@ void ImuNode::StartStreaming([[maybe_unused]] const std::shared_ptr<std_srvs::sr
     m_streaming = true;
 }
 
+void ImuNode::StopStreaming([[maybe_unused]] const std::shared_ptr<std_srvs::srv::Empty::Request> request,
+                             [[maybe_unused]] std::shared_ptr<std_srvs::srv::Empty::Response> response)  
+{
+    if (m_streaming) {
+        RCLCPP_WARN(this->get_logger(), "Already streaming");
+
+        return;
+    }
+
+    RCLCPP_INFO(this->get_logger(), "Start Streaming");
+
+    std::vector<int> imuNumbers = {3};
+    int commandValue = 86;
+
+    for (auto id : imuNumbers) {
+        auto command = CreateImuCommand(id, commandValue);
+        ApplyCommand(command);
+    }
+
+    m_streaming = false;
+}
+
 std::string ImuNode::CreateImuCommand(int logicalId,
                                       int commandNumber,
                                       const std::vector<int>& arguments ) 

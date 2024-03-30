@@ -15,6 +15,10 @@ build/
 *.sln
 *.suo
 *.pdb
+*.vscode
+
+*log
+*install
 
 # Xcode
 build/

@@ -24,8 +24,14 @@ namespace telemetry
         
         void TareSensorQuaternion(const std::shared_ptr<std_srvs::srv::Empty::Request> request,
                             std::shared_ptr<std_srvs::srv::Empty::Response> response);
+        
+        void OffsetWithCurrentOrientation(const std::shared_ptr<std_srvs::srv::Empty::Request> request,
+                            std::shared_ptr<std_srvs::srv::Empty::Response> response);
 
-        void ApplyCommand(const std::string& command, bool show_response = false);
+        void SetBaseOffsetWithCurrentOrientation(const std::shared_ptr<std_srvs::srv::Empty::Request> request,
+                            std::shared_ptr<std_srvs::srv::Empty::Response> response);
+
+        void ApplyCommand(const std::string& command, bool showResponse = false);
 
 
     private:
@@ -42,6 +48,8 @@ namespace telemetry
         rclcpp::Service<std_srvs::srv::Empty>::SharedPtr m_stopService;
         rclcpp::Service<std_srvs::srv::Empty>::SharedPtr m_serviceTare;
         rclcpp::Service<std_srvs::srv::Empty>::SharedPtr m_serviceTareQuaternion;
+        rclcpp::Service<std_srvs::srv::Empty>::SharedPtr m_serviceOffset;
+        rclcpp::Service<std_srvs::srv::Empty>::SharedPtr m_serviceBaseOffset;
         
     };
 }

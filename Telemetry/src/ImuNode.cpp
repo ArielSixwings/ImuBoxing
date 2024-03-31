@@ -28,6 +28,12 @@ namespace telemetry
         m_serviceTareQuaternion = this->create_service<std_srvs::srv::Empty>(
             "imu/tareQuaternion", std::bind(&ImuNode::TareSensorQuaternion, this, std::placeholders::_1, std::placeholders::_2));
 
+        m_serviceOffset = this->create_service<std_srvs::srv::Empty>(
+            "imu/offset", std::bind(&ImuNode::OffsetWithCurrentOrientation, this, std::placeholders::_1, std::placeholders::_2));
+
+        m_serviceBaseOffset = this->create_service<std_srvs::srv::Empty>(
+            "imu/baseOffset", std::bind(&ImuNode::SetBaseOffsetWithCurrentOrientation, this, std::placeholders::_1, std::placeholders::_2));
+
         auto timerCallback = [this]() -> void {
             // Placeholder for timer callback functionality
         };
@@ -107,6 +113,36 @@ namespace telemetry
 
         for (auto id : imuNumbers) {
             auto command = SpaceSensor::CreateImuCommand(id, SpaceSensor::Commands::TareWithQuaternion);
+            ApplyCommand(command);
+        }
+
+    }
+
+    void ImuNode::OffsetWithCurrentOrientation([[maybe_unused]] const std::shared_ptr<std_srvs::srv::Empty::Request> request,
+                                               [[maybe_unused]] std::shared_ptr<std_srvs::srv::Empty::Response> response) 
+    {
+        
+        RCLCPP_INFO(this->get_logger(), "Offset with current orientation");
+
+        std::vector<int> imuNumbers = {3};
+
+        for (auto id : imuNumbers) {
+            auto command = SpaceSensor::CreateImuCommand(id, SpaceSensor::Commands::OffsetWithCurrentOrientation);
+            ApplyCommand(command);
+        }
+
+    }
+
+    void ImuNode::SetBaseOffsetWithCurrentOrientation([[maybe_unused]] const std::shared_ptr<std_srvs::srv::Empty::Request> request,
+                                                      [[maybe_unused]] std::shared_ptr<std_srvs::srv::Empty::Response> response) 
+    {
+        
+        RCLCPP_INFO(this->get_logger(), "Offset with current orientation");
+
+        std::vector<int> imuNumbers = {3};
+
+        for (auto id : imuNumbers) {
+            auto command = SpaceSensor::CreateImuCommand(id, SpaceSensor::Commands::SetBaseOffsetWithCurrentOrientation);
             ApplyCommand(command);
         }
 

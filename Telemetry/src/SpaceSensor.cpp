@@ -8,21 +8,20 @@ namespace telemetry
                                         int commandNumber,
                                         const std::vector<int>& arguments ) 
     {
-
         std::ostringstream command;
 
         command << ">" << logicalId << "," << commandNumber;
 
-        if (not arguments.empty()) {
-            
+        if (not arguments.empty()) 
+        {
             command << ",";
 
-            for (size_t i = 0; i < arguments.size(); ++i) {
-                command << arguments[i];
-                if (i < arguments.size() - 1) {
-                    command << ",";
-                }
+            for (auto argument : arguments) 
+            {
+                command << argument;
             }
+
+            command << ",";
         }
 
         command << "\n";

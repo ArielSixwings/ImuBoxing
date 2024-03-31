@@ -10,6 +10,8 @@ namespace telemetry
     public:
         enum Commands
         {
+            OffsetWithCurrentOrientation = 19,
+            SetBaseOffsetWithCurrentOrientation = 22,
             StartStreaming = 85,
             StopStreaming = 86,
             TareWithCurrentOrientation = 96,

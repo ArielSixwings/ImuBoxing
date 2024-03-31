@@ -34,6 +34,8 @@ namespace telemetry
 
         void SetStreamingSlots(const std::vector<int> &arguments);
 
+        void SetStreamingTiming(const int frequency);
+
         void ApplyCommand(const std::string &command, bool showResponse = false);
 
     private:

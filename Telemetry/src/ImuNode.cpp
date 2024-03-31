@@ -194,4 +194,21 @@ namespace telemetry
                                                        arguments));
         }
     }
+
+    void ImuNode::SetStreamingTiming(const int frequency)
+    {
+
+        RCLCPP_INFO(this->get_logger(), "Set Streaming timing");
+
+        std::vector<int> imuNumbers = {3};
+
+        const auto usedFrequency = frequency > 0 ? (1000000 / frequency) : 0;
+
+        for (auto id : imuNumbers)
+        {
+            ApplyCommand(SpaceSensor::CreateImuCommand(id,
+                                                       SpaceSensor::Commands::SetStreamingTiming,
+                                                       {usedFrequency, -1, 0}));
+        }
+    }
 }

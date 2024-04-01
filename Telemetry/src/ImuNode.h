@@ -1,9 +1,9 @@
 #pragma once
 
-#include "rclcpp/rclcpp.hpp"
-#include "geometry_msgs/msg/vector3.hpp"
-#include "std_srvs/srv/empty.hpp"
+#include <rclcpp/rclcpp.hpp>
+#include <std_srvs/srv/empty.hpp>
 #include <boost/asio.hpp>
+#include <geometry_msgs/msg/vector3.hpp>
 
 namespace telemetry
 {
@@ -37,6 +37,8 @@ namespace telemetry
         void SetStreamingTiming(const int frequency);
 
         void ApplyCommand(const std::string &command, bool showResponse = false);
+
+        bool LoopCallback();
 
     private:
         int imuNumber = 3;

@@ -6,7 +6,7 @@ int main(int argc, char * argv[]) {
     try {
         auto node = std::make_shared<telemetry::ImuNode>();
         rclcpp::spin(node);
-        node->CreateAnglesPublisher();
+        // node->CreateAnglesPublisher();
     } catch (const std::exception& e) {
         RCLCPP_ERROR(rclcpp::get_logger("ImuNode"), "Exception thrown: %s", e.what());
     } catch (...) {

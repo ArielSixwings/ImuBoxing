@@ -19,6 +19,8 @@ namespace telemetry
             throw;
         }
 
+        m_publisher = create_publisher<geometry_msgs::msg::Vector3>("imu/angles", 1);
+
         m_startService = create_service<std_srvs::srv::Empty>(
             "imu/start", std::bind(&ImuNode::StartStreaming, this, std::placeholders::_1, std::placeholders::_2));
 
@@ -39,12 +41,8 @@ namespace telemetry
 
         SetStreamingSlots({1, 255, 255, 255, 255, 255, 255, 255});
 
-        auto timerCallback = [this]() -> void
-        {
-            // Placeholder for timer callback functionality
-        };
-
-        m_timer = create_wall_timer(std::chrono::milliseconds(5), timerCallback);
+        auto cbGroup = create_callback_group(rclcpp::CallbackGroupType::MutuallyExclusive);
+        m_timer = create_wall_timer(std::chrono::milliseconds(5), std::bind(&ImuNode::LoopCallback, this), cbGroup);
     }
 
     void ImuNode::ApplyCommand(const std::string &command, bool showResponse)
@@ -62,7 +60,7 @@ namespace telemetry
             if (bytesRead > 0)
             {
                 std::string response(responseBuffer.begin(), responseBuffer.begin() + bytesRead);
-                RCLCPP_INFO(this->get_logger(), ">> %s", response.c_str());
+                RCLCPP_INFO(get_logger(), ">> %s", response.c_str());
             }
         }
 
@@ -71,7 +69,7 @@ namespace telemetry
 
     void ImuNode::CreateAnglesPublisher()
     {
-        m_publisher = this->create_publisher<geometry_msgs::msg::Vector3>("imu/angles", 1);
+        m_publisher = create_publisher<geometry_msgs::msg::Vector3>("imu/angles", 1);
     }
 
     void ImuNode::StartStreaming([[maybe_unused]] const std::shared_ptr<std_srvs::srv::Empty::Request> request,
@@ -79,12 +77,12 @@ namespace telemetry
     {
         if (m_streaming)
         {
-            RCLCPP_WARN(this->get_logger(), "Already streaming");
+            RCLCPP_WARN(get_logger(), "Already streaming");
 
             return;
         }
 
-        RCLCPP_INFO(this->get_logger(), "Start Streaming");
+        RCLCPP_INFO(get_logger(), "Start Streaming");
 
         std::vector<int> imuNumbers = {3};
 
@@ -102,12 +100,12 @@ namespace telemetry
     {
         if (not m_streaming)
         {
-            RCLCPP_WARN(this->get_logger(), "Already not streaming");
+            RCLCPP_WARN(get_logger(), "Already not streaming");
 
             return;
         }
 
-        RCLCPP_INFO(this->get_logger(), "Stop Streaming");
+        RCLCPP_INFO(get_logger(), "Stop Streaming");
 
         std::vector<int> imuNumbers = {3};
 
@@ -124,7 +122,7 @@ namespace telemetry
                              [[maybe_unused]] std::shared_ptr<std_srvs::srv::Empty::Response> response)
     {
 
-        RCLCPP_INFO(this->get_logger(), "Tare Sensor");
+        RCLCPP_INFO(get_logger(), "Tare Sensor");
 
         std::vector<int> imuNumbers = {3};
 
@@ -139,7 +137,7 @@ namespace telemetry
                                        [[maybe_unused]] std::shared_ptr<std_srvs::srv::Empty::Response> response)
     {
 
-        RCLCPP_INFO(this->get_logger(), "Tare Sensor Quaternion");
+        RCLCPP_INFO(get_logger(), "Tare Sensor Quaternion");
 
         std::vector<int> imuNumbers = {3};
 
@@ -154,7 +152,7 @@ namespace telemetry
                                                [[maybe_unused]] std::shared_ptr<std_srvs::srv::Empty::Response> response)
     {
 
-        RCLCPP_INFO(this->get_logger(), "Offset with current orientation");
+        RCLCPP_INFO(get_logger(), "Offset with current orientation");
 
         std::vector<int> imuNumbers = {3};
 
@@ -169,7 +167,7 @@ namespace telemetry
                                                       [[maybe_unused]] std::shared_ptr<std_srvs::srv::Empty::Response> response)
     {
 
-        RCLCPP_INFO(this->get_logger(), "Offset with current orientation");
+        RCLCPP_INFO(get_logger(), "Offset with current orientation");
 
         std::vector<int> imuNumbers = {3};
 
@@ -183,7 +181,7 @@ namespace telemetry
     void ImuNode::SetStreamingSlots(const std::vector<int> &arguments)
     {
 
-        RCLCPP_INFO(this->get_logger(), "Set Streaming Slots");
+        RCLCPP_INFO(get_logger(), "Set Streaming Slots");
 
         std::vector<int> imuNumbers = {3};
 
@@ -198,7 +196,7 @@ namespace telemetry
     void ImuNode::SetStreamingTiming(const int frequency)
     {
 
-        RCLCPP_INFO(this->get_logger(), "Set Streaming timing");
+        RCLCPP_INFO(get_logger(), "Set Streaming timing");
 
         std::vector<int> imuNumbers = {3};
 
@@ -210,5 +208,83 @@ namespace telemetry
                                                        SpaceSensor::Commands::SetStreamingTiming,
                                                        {usedFrequency, -1, 0}));
         }
+    }
+
+    bool ImuNode::LoopCallback()
+    {
+        if (not m_streaming)
+        {
+            RCLCPP_INFO(get_logger(), "Not streaming");
+            return false;
+        }
+
+        std::vector<char> responseBuffer(128);
+
+        size_t bytesRead = m_serialPort->read_some(boost::asio::buffer(responseBuffer));
+
+        if (bytesRead <= 0)
+        {
+            RCLCPP_INFO(get_logger(), "No bytes to read");
+            return true;
+        }
+
+        std::string data(responseBuffer.begin(), responseBuffer.begin() + bytesRead);
+
+        if (data.empty())
+        {
+            RCLCPP_ERROR(get_logger(), "Data is empty");
+            return false;
+        }
+
+        if (static_cast<unsigned char>(data[0]) != 0)
+        {
+            RCLCPP_ERROR(get_logger(), "SEE WHY THIS IS A ERROR");
+            return false;
+        }
+
+        if (data.length() <= 3)
+        {
+            RCLCPP_ERROR(get_logger(), "Data size is invalid");
+            return false;
+        }
+
+        std::replace(data.begin(), data.end(), '\r', ' ');
+        std::replace(data.begin(), data.end(), '\n', ' ');
+
+        std::istringstream iss(data);
+        std::vector<std::string> dataList((std::istream_iterator<std::string>(iss)),
+                                          std::istream_iterator<std::string>());
+
+        if (dataList.empty())
+        {
+            RCLCPP_ERROR(get_logger(), "Data List is empty");
+            return false;
+        }
+
+        auto &lastElement = dataList.back();
+        std::vector<std::string> eulerVectorString;
+
+        std::string eulerString = lastElement.substr(3);
+        std::istringstream eulerStream(eulerString);
+        std::string segment;
+
+        while (std::getline(eulerStream, segment, ','))
+        {
+            eulerVectorString.push_back(segment);
+        }
+
+        if (eulerVectorString.size() < 3)
+        {
+            RCLCPP_ERROR(get_logger(), "Result vector is too short");
+            return false;
+        }
+
+        geometry_msgs::msg::Vector3 message;
+        message.x = std::stod(eulerVectorString[0]);
+        message.y = std::stod(eulerVectorString[1]);
+        message.z = std::stod(eulerVectorString[2]);
+
+        m_publisher->publish(message);
+        return true;
     }
 }

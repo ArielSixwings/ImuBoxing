@@ -12,8 +12,6 @@ namespace telemetry
     public:
         ImuNode();
 
-        void CreateAnglesPublisher();
-
         void StartStreaming(const std::shared_ptr<std_srvs::srv::Empty::Request> request,
                             std::shared_ptr<std_srvs::srv::Empty::Response> response);
 
@@ -37,6 +35,12 @@ namespace telemetry
         void SetStreamingTiming(const int frequency);
 
         void ApplyCommand(const std::string &command, bool showResponse = false);
+
+        void SetCompassEnabledToZero();
+
+        void SetEulerAngleDecompositionOrder();
+
+        void ManualFlush();
 
         bool LoopCallback();
 

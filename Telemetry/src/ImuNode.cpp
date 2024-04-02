@@ -4,6 +4,7 @@
 
 #include <sstream>
 #include <thread>
+#include <ranges>
 
 namespace telemetry
 {
@@ -21,8 +22,12 @@ namespace telemetry
 
         m_publisher = create_publisher<geometry_msgs::msg::Vector3>("imu/angles", 1);
 
+        auto callBackGroup = create_callback_group(rclcpp::CallbackGroupType::Reentrant);
+
         m_startService = create_service<std_srvs::srv::Empty>(
-            "imu/start", std::bind(&ImuNode::StartStreaming, this, std::placeholders::_1, std::placeholders::_2));
+            "imu/start", std::bind(&ImuNode::StartStreaming, this, std::placeholders::_1, std::placeholders::_2),
+            rmw_qos_profile_services_default,
+            callBackGroup);
 
         m_stopService = create_service<std_srvs::srv::Empty>(
             "imu/stop", std::bind(&ImuNode::StopStreaming, this, std::placeholders::_1, std::placeholders::_2));
@@ -39,10 +44,21 @@ namespace telemetry
         m_serviceBaseOffset = create_service<std_srvs::srv::Empty>(
             "imu/baseOffset", std::bind(&ImuNode::SetBaseOffsetWithCurrentOrientation, this, std::placeholders::_1, std::placeholders::_2));
 
-        SetStreamingSlots({1, 255, 255, 255, 255, 255, 255, 255});
+        SetStreamingSlots({SpaceSensor::StreamingCommand::ReadTaredOrientationAsEulerAngles,
+                           SpaceSensor::StreamingCommand::NoCommand,
+                           SpaceSensor::StreamingCommand::NoCommand,
+                           SpaceSensor::StreamingCommand::NoCommand,
+                           SpaceSensor::StreamingCommand::NoCommand,
+                           SpaceSensor::StreamingCommand::NoCommand,
+                           SpaceSensor::StreamingCommand::NoCommand,
+                           SpaceSensor::StreamingCommand::NoCommand});
 
-        auto cbGroup = create_callback_group(rclcpp::CallbackGroupType::MutuallyExclusive);
-        m_timer = create_wall_timer(std::chrono::milliseconds(5), std::bind(&ImuNode::LoopCallback, this), cbGroup);
+        m_timer = create_wall_timer(std::chrono::milliseconds(5), std::bind(&ImuNode::LoopCallback, this), callBackGroup);
+
+        SetCompassEnabledToZero();
+        SetEulerAngleDecompositionOrder();
+
+        ManualFlush();
     }
 
     void ImuNode::ApplyCommand(const std::string &command, bool showResponse)
@@ -65,11 +81,6 @@ namespace telemetry
         }
 
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
-    }
-
-    void ImuNode::CreateAnglesPublisher()
-    {
-        m_publisher = create_publisher<geometry_msgs::msg::Vector3>("imu/angles", 1);
     }
 
     void ImuNode::StartStreaming([[maybe_unused]] const std::shared_ptr<std_srvs::srv::Empty::Request> request,
@@ -193,6 +204,36 @@ namespace telemetry
         }
     }
 
+    void ImuNode::SetCompassEnabledToZero()
+    {
+
+        RCLCPP_INFO(get_logger(), "Set Compass Enabled to 0");
+
+        std::vector<int> imuNumbers = {3};
+
+        for (auto id : imuNumbers)
+        {
+            ApplyCommand(SpaceSensor::CreateImuCommand(id,
+                                                       SpaceSensor::Commands::SetCompassEnabled,
+                                                       {0}));
+        }
+    }
+
+    void ImuNode::SetEulerAngleDecompositionOrder()
+    {
+
+        RCLCPP_INFO(get_logger(), "Set Euler Angle Decomposition Order");
+
+        std::vector<int> imuNumbers = {3};
+
+        for (auto id : imuNumbers)
+        {
+            ApplyCommand(SpaceSensor::CreateImuCommand(id,
+                                                       SpaceSensor::Commands::SetEulerAngleDecompositionOrder,
+                                                       {5}));
+        }
+    }
+
     void ImuNode::SetStreamingTiming(const int frequency)
     {
 
@@ -207,6 +248,18 @@ namespace telemetry
             ApplyCommand(SpaceSensor::CreateImuCommand(id,
                                                        SpaceSensor::Commands::SetStreamingTiming,
                                                        {usedFrequency, -1, 0}));
+        }
+    }
+
+    void ImuNode::ManualFlush()
+    {
+        std::vector<char> buffer(128);
+
+        auto bytesRead = m_serialPort->read_some(boost::asio::buffer(buffer));
+
+        for (size_t i = 0; (i < 20 and bytesRead > 0); i++)
+        {
+            bytesRead = m_serialPort->read_some(boost::asio::buffer(buffer));
         }
     }
 

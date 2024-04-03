@@ -1,4 +1,4 @@
-#include "ImuNode.h"
+#include "src/ImuNode.h"
 
 #include <thread>
 

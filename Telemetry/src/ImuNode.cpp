@@ -53,12 +53,15 @@ namespace telemetry
                            SpaceSensor::StreamingCommand::NoCommand,
                            SpaceSensor::StreamingCommand::NoCommand});
 
-        m_timer = create_wall_timer(std::chrono::milliseconds(5), std::bind(&ImuNode::LoopCallback, this), callBackGroup);
+        SetStreamingTiming(100);
 
         SetCompassEnabledToZero();
         SetEulerAngleDecompositionOrder();
 
         ManualFlush();
+
+        m_timer = create_wall_timer(std::chrono::milliseconds(5),
+                                    std::bind(&ImuNode::LoopCallback, this), callBackGroup);
     }
 
     void ImuNode::ApplyCommand(const std::string &command, bool showResponse)

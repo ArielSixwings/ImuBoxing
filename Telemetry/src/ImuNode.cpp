@@ -26,8 +26,7 @@ namespace telemetry
 
         m_startService = create_service<std_srvs::srv::Empty>(
             "imu/start", std::bind(&ImuNode::StartStreaming, this, std::placeholders::_1, std::placeholders::_2),
-            rmw_qos_profile_services_default,
-            callBackGroup);
+            rmw_qos_profile_services_default);
 
         m_stopService = create_service<std_srvs::srv::Empty>(
             "imu/stop", std::bind(&ImuNode::StopStreaming, this, std::placeholders::_1, std::placeholders::_2));
@@ -61,7 +60,7 @@ namespace telemetry
         ManualFlush();
 
         m_timer = create_wall_timer(std::chrono::milliseconds(5),
-                                    std::bind(&ImuNode::LoopCallback, this), callBackGroup);
+                                    std::bind(&ImuNode::LoopCallback, this));
     }
 
     void ImuNode::ApplyCommand(const std::string &command, bool showResponse)
@@ -264,6 +263,7 @@ namespace telemetry
         {
             bytesRead = m_serialPort->read_some(boost::asio::buffer(buffer));
         }
+        RCLCPP_INFO(get_logger(), "Flushed data");
     }
 
     bool ImuNode::LoopCallback()
@@ -271,10 +271,11 @@ namespace telemetry
         if (not m_streaming)
         {
             RCLCPP_INFO(get_logger(), "Not streaming");
+            std::this_thread::sleep_for(std::chrono::seconds(1));
             return false;
         }
 
-        std::vector<char> responseBuffer(128);
+        std::vector<char> responseBuffer(256);
 
         size_t bytesRead = m_serialPort->read_some(boost::asio::buffer(responseBuffer));
 
@@ -292,11 +293,13 @@ namespace telemetry
             return false;
         }
 
-        if (static_cast<unsigned char>(data[0]) != 0)
-        {
-            RCLCPP_ERROR(get_logger(), "SEE WHY THIS IS A ERROR");
-            return false;
-        }
+        // if (static_cast<unsigned char>(data[0]) != 0)
+        // {
+        //     RCLCPP_ERROR(get_logger(), "Data acquired is invalid: %s", data.c_str());
+
+        //     std::this_thread::sleep_for(std::chrono::milliseconds(500));
+        //     return false;
+        // }
 
         if (data.length() <= 3)
         {

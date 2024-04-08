@@ -5,6 +5,7 @@
 #include <sstream>
 #include <thread>
 #include <ranges>
+#include <sys/ioctl.h>
 
 namespace telemetry
 {
@@ -20,9 +21,9 @@ namespace telemetry
             throw;
         }
 
-        m_publisher = create_publisher<geometry_msgs::msg::Vector3>("imu/angles", 1);
+        m_serialPort->set_option(boost::asio::serial_port_base::baud_rate(115200));
 
-        auto callBackGroup = create_callback_group(rclcpp::CallbackGroupType::Reentrant);
+        m_publisher = create_publisher<geometry_msgs::msg::Vector3>("imu/angles", 1);
 
         m_startService = create_service<std_srvs::srv::Empty>(
             "imu/start", std::bind(&ImuNode::StartStreaming, this, std::placeholders::_1, std::placeholders::_2),
@@ -56,8 +57,6 @@ namespace telemetry
 
         SetCompassEnabledToZero();
         SetEulerAngleDecompositionOrder();
-
-        ManualFlush();
 
         m_timer = create_wall_timer(std::chrono::milliseconds(5),
                                     std::bind(&ImuNode::LoopCallback, this));
@@ -255,19 +254,40 @@ namespace telemetry
 
     void ImuNode::ManualFlush()
     {
+        int bytesAvailable;
+        ioctl(m_serialPort->native_handle(), FIONREAD, &bytesAvailable);
+
+        if (not bytesAvailable)
+        {
+            RCLCPP_INFO(get_logger(), "No bytes to flush");
+            m_wasFlushed = true;
+            return;
+        }
+
         std::vector<char> buffer(128);
 
         auto bytesRead = m_serialPort->read_some(boost::asio::buffer(buffer));
 
         for (size_t i = 0; (i < 20 and bytesRead > 0); i++)
         {
-            bytesRead = m_serialPort->read_some(boost::asio::buffer(buffer));
+            RCLCPP_INFO(get_logger(), ".");
+
+            std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
+            bytesRead = m_serialPort->read_some(boost::asio::buffer(buffer, bytesAvailable));
         }
+
         RCLCPP_INFO(get_logger(), "Flushed data");
+        m_wasFlushed = true;
     }
 
     bool ImuNode::LoopCallback()
     {
+        if (not m_wasFlushed)
+        {
+            ManualFlush();
+        }
+
         if (not m_streaming)
         {
             RCLCPP_INFO(get_logger(), "Not streaming");
@@ -275,55 +295,77 @@ namespace telemetry
             return false;
         }
 
-        std::vector<char> responseBuffer(256);
+        int bytesAvailable;
 
-        size_t bytesRead = m_serialPort->read_some(boost::asio::buffer(responseBuffer));
-
-        if (bytesRead <= 0)
+        if (ioctl(m_serialPort->native_handle(), FIONREAD, &bytesAvailable) == -1)
         {
-            RCLCPP_INFO(get_logger(), "No bytes to read");
-            return true;
-        }
+            RCLCPP_ERROR(get_logger(), "native_handle failed");
 
-        std::string data(responseBuffer.begin(), responseBuffer.begin() + bytesRead);
-
-        if (data.empty())
-        {
-            RCLCPP_ERROR(get_logger(), "Data is empty");
             return false;
         }
 
-        // if (static_cast<unsigned char>(data[0]) != 0)
-        // {
-        //     RCLCPP_ERROR(get_logger(), "Data acquired is invalid: %s", data.c_str());
+        if (static_cast<size_t>(bytesAvailable) < SpaceSensor::EulerAngle::SizeInBytes())
+        {
+            RCLCPP_INFO(get_logger(), "No bytes available ");
 
-        //     std::this_thread::sleep_for(std::chrono::milliseconds(500));
-        //     return false;
-        // }
+            return true;
+        }
 
-        if (data.length() <= 3)
+        std::vector<char> responseBuffer(128);
+
+        size_t bytesRead = m_serialPort->read_some(boost::asio::buffer(responseBuffer,
+                                                                       bytesAvailable));
+
+        if (bytesRead <= 0)
+        {
+            RCLCPP_INFO(get_logger(), "No bytes read ");
+
+            return true;
+        }
+
+        if (static_cast<unsigned char>(responseBuffer[0]) != 0)
+        {
+            RCLCPP_ERROR(get_logger(), "responseBuffer[0]: %x", responseBuffer[0]);
+
+            return false;
+        }
+
+        if (responseBuffer.size() <= 3)
         {
             RCLCPP_ERROR(get_logger(), "Data size is invalid");
             return false;
         }
 
+        std::string data(responseBuffer.begin(), responseBuffer.begin() + bytesRead);
+
+        RCLCPP_INFO(get_logger(), "Data %s", data.c_str());
+
         std::replace(data.begin(), data.end(), '\r', ' ');
         std::replace(data.begin(), data.end(), '\n', ' ');
 
-        std::istringstream iss(data);
-        std::vector<std::string> dataList((std::istream_iterator<std::string>(iss)),
-                                          std::istream_iterator<std::string>());
+        RCLCPP_INFO(get_logger(), "Cleaned Data %s", data.c_str());
 
-        if (dataList.empty())
+        std::istringstream iss(data);
+        std::vector<std::string> dataVector((std::istream_iterator<std::string>(iss)),
+                                            std::istream_iterator<std::string>());
+
+        if (dataVector.empty())
         {
             RCLCPP_ERROR(get_logger(), "Data List is empty");
             return false;
         }
 
-        auto &lastElement = dataList.back();
+        std::ranges::for_each(dataVector, [&](const auto theData)
+                              { RCLCPP_INFO(get_logger(), "Data item %s", theData.c_str()); });
+
+        auto &lastElement = dataVector.back();
+
+        RCLCPP_INFO(get_logger(), "lastElement: %s", lastElement.c_str());
+
         std::vector<std::string> eulerVectorString;
 
         std::string eulerString = lastElement.substr(3);
+
         std::istringstream eulerStream(eulerString);
         std::string segment;
 

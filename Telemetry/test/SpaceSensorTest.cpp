@@ -2,24 +2,16 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-// g++ -c MathUtil.cpp -o MathUtil.o
-// g++ -c MathUtilTest.cpp -o MathUtilTest.o `catch2_config.cpp` -lcatch2_main
-// g++ MathUtil.o MathUtilTest.o -o test
-
-SCENARIO("SpaceSensorTest")
+SCENARIO("SpaceSensorTest", "[Unit]")
 {
 
-  GIVEN("Two numbers")
+  WHEN("EulerAngle::SizeInBytes is called")
   {
+    const auto result = telemetry::SpaceSensor::EulerAngle::SizeInBytes();
 
-    WHEN("they are added together")
+    THEN("Result is 15")
     {
-
-      THEN("the result should be their sum")
-      {
-
-        CHECK(true);
-      }
+      CHECK(result == 15);
     }
   }
 }

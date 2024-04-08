@@ -60,6 +60,33 @@ namespace telemetry
             NoCommand = 255
         };
 
+        struct EulerAngle
+        {
+            int8_t expectedFirstByte;
+
+            int8_t StartOfPacket;
+            int8_t Command;
+            float Pitch;
+            float Yaw;
+            float Roll;
+            int8_t Checksum;
+
+            EulerAngle(int8_t expectedFirstByte)
+                : StartOfPacket(expectedFirstByte)
+            {
+            }
+
+            EulerAngle &operator=(const EulerAngle &other) = default;
+            bool operator==(const EulerAngle &other) const = default;
+
+            static constexpr size_t SizeInBytes()
+            {
+                return sizeof(StartOfPacket) + sizeof(Command) + sizeof(Pitch) + sizeof(Yaw) + sizeof(Roll) + sizeof(Checksum);
+            }
+
+            std::vector<float> Parse(std::vector<char> &buffer);
+        };
+
         static std::string CreateImuCommand(int logicalId,
                                             int commandNumber,
                                             const std::vector<int> &arguments = {});

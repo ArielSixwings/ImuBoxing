@@ -34,8 +34,8 @@ namespace telemetry
 
         buffer.erase(std::remove(buffer.begin(), buffer.end(), ' '), buffer.end());
         buffer.erase(std::remove_if(buffer.begin(), buffer.end(),
-                                    [](char c)
-                                    { return not isalnum(c) and c != '.' and c != ','; }),
+                                    [](char byte)
+                                    { return not isalnum(byte) and byte != '.' and byte != ','; }),
                      buffer.end());
 
         std::vector<float> angles;
@@ -44,8 +44,15 @@ namespace telemetry
 
         while ((pos = str.find(',')) != std::string::npos)
         {
-            angles.push_back(std::stof(str.substr(0, pos)));
-            str.erase(0, pos + 1);
+            try
+            {
+                angles.push_back(std::stof(str.substr(0, pos)));
+                str.erase(0, pos + 1);
+            }
+            catch (const std::exception &e)
+            {
+                // std::cerr << e.what() << '\n';
+            }
         }
 
         return angles;

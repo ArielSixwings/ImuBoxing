@@ -252,35 +252,6 @@ namespace telemetry
         }
     }
 
-    void ImuNode::ManualFlush()
-    {
-        int bytesAvailable;
-        ioctl(m_serialPort->native_handle(), FIONREAD, &bytesAvailable);
-
-        if (not bytesAvailable)
-        {
-            RCLCPP_INFO(get_logger(), "No bytes to flush");
-            m_wasFlushed = true;
-            return;
-        }
-
-        std::vector<char> buffer(128);
-
-        auto bytesRead = m_serialPort->read_some(boost::asio::buffer(buffer));
-
-        for (size_t i = 0; (i < 20 and bytesRead > 0); i++)
-        {
-            RCLCPP_INFO(get_logger(), ".");
-
-            std::this_thread::sleep_for(std::chrono::milliseconds(100));
-
-            bytesRead = m_serialPort->read_some(boost::asio::buffer(buffer, bytesAvailable));
-        }
-
-        RCLCPP_INFO(get_logger(), "Flushed data");
-        m_wasFlushed = true;
-    }
-
     bool ImuNode::LoopCallback()
     {
         if (not m_streaming)
@@ -315,12 +286,6 @@ namespace telemetry
             return true;
         }
 
-        // for (size_t i = 0; i < bytesRead; i++)
-        // {
-        //     std::cout << " " << responseBuffer[i];
-        // }
-        // std::cout << "-------------" << std::endl;
-
         SpaceSensor::EulerAngle eulerAngle(0);
 
         const auto angles = eulerAngle.Parse(responseBuffer);
@@ -331,6 +296,7 @@ namespace telemetry
         message.z = angles[2];
 
         m_publisher->publish(message);
+
         return true;
     }
 }

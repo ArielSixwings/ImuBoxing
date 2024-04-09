@@ -40,14 +40,11 @@ namespace telemetry
 
         void SetEulerAngleDecompositionOrder();
 
-        void ManualFlush();
-
         bool LoopCallback();
 
     private:
         int imuNumber = 3;
         bool m_streaming = false;
-        bool m_wasFlushed = false;
 
         rclcpp::Publisher<geometry_msgs::msg::Vector3>::SharedPtr m_publisher;
 

@@ -32,28 +32,21 @@ namespace telemetry
     std::vector<float> SpaceSensor::EulerAngle::Parse(std::vector<char> &buffer)
     {
 
-        if (buffer.empty() or buffer.size() < 15)
-        {
-            return {};
-        }
-
-        if (buffer[0] != 0x01)
-        {
-            return {};
-        }
+        buffer.erase(std::remove(buffer.begin(), buffer.end(), ' '), buffer.end());
+        buffer.erase(std::remove_if(buffer.begin(), buffer.end(),
+                                    [](char c)
+                                    { return not isalnum(c) and c != '.' and c != ','; }),
+                     buffer.end());
 
         std::vector<float> angles;
+        std::string str(buffer.begin(), buffer.end());
+        size_t pos = 0;
 
-        const auto headerSize = 2 * sizeof(int8_t);
-
-        float pitch, yaw, roll;
-        std::memcpy(&pitch, buffer.data() + headerSize, sizeof(float));
-        std::memcpy(&yaw, buffer.data() + headerSize + sizeof(float), sizeof(float));
-        std::memcpy(&roll, buffer.data() + headerSize + (2 * sizeof(float)), sizeof(float));
-
-        angles.push_back(pitch);
-        angles.push_back(yaw);
-        angles.push_back(roll);
+        while ((pos = str.find(',')) != std::string::npos)
+        {
+            angles.push_back(std::stof(str.substr(0, pos)));
+            str.erase(0, pos + 1);
+        }
 
         return angles;
     }

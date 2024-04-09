@@ -2,16 +2,20 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-SCENARIO("SpaceSensorTest", "[Unit]")
+SCENARIO("Should return the size of the euler angles response", "[Unit]")
 {
 
-  WHEN("EulerAngle::SizeInBytes is called")
+  GIVEN("")
   {
-    const auto result = telemetry::SpaceSensor::EulerAngle::SizeInBytes();
 
-    THEN("Result is 15")
+    WHEN("EulerAngle::SizeInBytes is called")
     {
-      CHECK(result == 15);
+      const auto result = telemetry::SpaceSensor::EulerAngle::SizeInBytes();
+
+      THEN("Result is 15")
+      {
+        CHECK(result == 15);
+      }
     }
   }
 }

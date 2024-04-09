@@ -283,14 +283,9 @@ namespace telemetry
 
     bool ImuNode::LoopCallback()
     {
-        if (not m_wasFlushed)
-        {
-            ManualFlush();
-        }
-
         if (not m_streaming)
         {
-            RCLCPP_INFO(get_logger(), "Not streaming");
+            RCLCPP_DEBUG(get_logger(), "Not streaming");
             std::this_thread::sleep_for(std::chrono::seconds(1));
             return false;
         }
@@ -300,14 +295,12 @@ namespace telemetry
         if (ioctl(m_serialPort->native_handle(), FIONREAD, &bytesAvailable) == -1)
         {
             RCLCPP_ERROR(get_logger(), "native_handle failed");
-
             return false;
         }
 
         if (static_cast<size_t>(bytesAvailable) < SpaceSensor::EulerAngle::SizeInBytes())
         {
-            RCLCPP_INFO(get_logger(), "No bytes available ");
-
+            RCLCPP_DEBUG(get_logger(), "No bytes available ");
             return true;
         }
 
@@ -318,72 +311,24 @@ namespace telemetry
 
         if (bytesRead <= 0)
         {
-            RCLCPP_INFO(get_logger(), "No bytes read ");
-
+            RCLCPP_DEBUG(get_logger(), "No bytes read ");
             return true;
         }
 
-        if (static_cast<unsigned char>(responseBuffer[0]) != 0)
-        {
-            RCLCPP_ERROR(get_logger(), "responseBuffer[0]: %x", responseBuffer[0]);
+        // for (size_t i = 0; i < bytesRead; i++)
+        // {
+        //     std::cout << " " << responseBuffer[i];
+        // }
+        // std::cout << "-------------" << std::endl;
 
-            return false;
-        }
+        SpaceSensor::EulerAngle eulerAngle(0);
 
-        if (responseBuffer.size() <= 3)
-        {
-            RCLCPP_ERROR(get_logger(), "Data size is invalid");
-            return false;
-        }
-
-        std::string data(responseBuffer.begin(), responseBuffer.begin() + bytesRead);
-
-        RCLCPP_INFO(get_logger(), "Data %s", data.c_str());
-
-        std::replace(data.begin(), data.end(), '\r', ' ');
-        std::replace(data.begin(), data.end(), '\n', ' ');
-
-        RCLCPP_INFO(get_logger(), "Cleaned Data %s", data.c_str());
-
-        std::istringstream iss(data);
-        std::vector<std::string> dataVector((std::istream_iterator<std::string>(iss)),
-                                            std::istream_iterator<std::string>());
-
-        if (dataVector.empty())
-        {
-            RCLCPP_ERROR(get_logger(), "Data List is empty");
-            return false;
-        }
-
-        std::ranges::for_each(dataVector, [&](const auto theData)
-                              { RCLCPP_INFO(get_logger(), "Data item %s", theData.c_str()); });
-
-        auto &lastElement = dataVector.back();
-
-        RCLCPP_INFO(get_logger(), "lastElement: %s", lastElement.c_str());
-
-        std::vector<std::string> eulerVectorString;
-
-        std::string eulerString = lastElement.substr(3);
-
-        std::istringstream eulerStream(eulerString);
-        std::string segment;
-
-        while (std::getline(eulerStream, segment, ','))
-        {
-            eulerVectorString.push_back(segment);
-        }
-
-        if (eulerVectorString.size() < 3)
-        {
-            RCLCPP_ERROR(get_logger(), "Result vector is too short");
-            return false;
-        }
+        const auto angles = eulerAngle.Parse(responseBuffer);
 
         geometry_msgs::msg::Vector3 message;
-        message.x = std::stod(eulerVectorString[0]);
-        message.y = std::stod(eulerVectorString[1]);
-        message.z = std::stod(eulerVectorString[2]);
+        message.x = angles[0];
+        message.y = angles[1];
+        message.z = angles[2];
 
         m_publisher->publish(message);
         return true;

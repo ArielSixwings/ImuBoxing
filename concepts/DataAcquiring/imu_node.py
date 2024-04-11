@@ -117,6 +117,8 @@ class IMUNode(Node):
             arguments_string = arguments_string[:-1]
             command += arguments_string
         command += '\n'
+
+        print("Command:",command.encode())
         return command.encode()
     
     def apply_command(self, command, showResponse=False):

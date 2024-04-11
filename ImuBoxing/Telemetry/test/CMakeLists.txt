@@ -5,7 +5,7 @@ add_executable(
   SpaceSensorTest.cpp
 )
 target_link_libraries(
-  UnitTest PRIVATE ImuNode Catch2::Catch2WithMain
+  UnitTest PRIVATE telemetrySource Catch2::Catch2WithMain
 )
 
 include(CTest)

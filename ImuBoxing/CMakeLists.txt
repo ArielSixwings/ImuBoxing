@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.5)
-project(telemetry)
+project(boxing)
 
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -18,9 +18,7 @@ find_package(geometry_msgs REQUIRED)
 find_package(std_srvs REQUIRED)
 find_package(Boost REQUIRED COMPONENTS system thread)
 
-add_subdirectory(src)
+add_subdirectory(Telemetry)
 
-add_executable(telemetryModule main.cpp)
-target_link_libraries(telemetryModule Boost::system Boost::thread ImuNode)
-
-add_subdirectory(test)
+add_executable(boxingModule main.cpp)
+target_link_libraries(boxingModule Boost::system Boost::thread telemetrySource)

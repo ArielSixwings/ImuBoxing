@@ -2,6 +2,8 @@
 
 #include <sstream>
 #include <cstring>
+#include <algorithm>
+#include <iterator>
 
 namespace telemetry
 {
@@ -27,6 +29,18 @@ namespace telemetry
 
         command << "\n";
         return command.str();
+    }
+
+    std::vector<uint8_t> SpaceSensor::BinaryCommand::Get()
+    {
+        std::vector<uint8_t> commandBuffer{StartOfPacket, LogicalId, Command};
+
+        std::ranges::copy(CommandData.begin(), CommandData.end(),
+                          std::back_inserter(commandBuffer));
+
+        commandBuffer.push_back(CheckSum);
+
+        return commandBuffer;
     }
 
     std::vector<float> SpaceSensor::EulerAngle::Parse(std::vector<char> &buffer)

@@ -80,8 +80,6 @@ namespace telemetry
                 RCLCPP_INFO(get_logger(), ">> %s", response.c_str());
             }
         }
-
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
 
     void ImuNode::StartStreaming([[maybe_unused]] const std::shared_ptr<std_srvs::srv::Empty::Request> request,

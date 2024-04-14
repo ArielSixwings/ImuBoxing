@@ -69,6 +69,13 @@ namespace telemetry
             PrependResponseHeader = 0xfa
         };
 
+        enum ResponsesSizes
+        {
+            Header = 3,
+            EulerAngle = 12,
+            Quaternion = 16
+        };
+
         struct BinaryCommand
         {
             uint8_t StartOfPacket = ValidateMode::Simple;
@@ -94,37 +101,28 @@ namespace telemetry
             bool operator==(const BinaryCommand &other) const = default;
         };
 
-        struct EulerAngle
+        struct BinaryResponse
         {
-            int8_t expectedFirstByte;
+            int8_t Status;
+            uint8_t LogicalId;
+            uint8_t DataLength = 0x00;
+            std::vector<uint8_t> ResponseData;
 
-            int8_t StartOfPacket;
-            int8_t Command;
-            float Pitch;
-            float Yaw;
-            float Roll;
-            int8_t Checksum;
+            BinaryResponse(const std::vector<uint8_t> &buffer,
+                           const ResponsesSizes responseSize);
 
-            EulerAngle(int8_t expectedFirstByte)
-                : StartOfPacket(expectedFirstByte)
-            {
-            }
+            bool operator==(const BinaryResponse &other) const = default;
 
-            EulerAngle &operator=(const EulerAngle &other) = default;
-            bool operator==(const EulerAngle &other) const = default;
+            bool IsValid() { return m_isValid; }
 
-            static constexpr size_t SizeInBytes()
-            {
-                return sizeof(StartOfPacket) + sizeof(Command) + sizeof(Pitch) + sizeof(Yaw) + sizeof(Roll) + sizeof(Checksum);
-            }
-
-            std::vector<float> Parse(std::vector<char> &buffer);
+        private:
+            bool m_isValid = false;
         };
+
+        static std::vector<float> ParseEulerAngle(const std::vector<uint8_t> &responseData);
 
         static std::string CreateImuCommand(int logicalId,
                                             int commandNumber,
                                             const std::vector<int> &arguments = {});
     };
 }
-
-std::ostream &operator<<(std::ostream &os, const telemetry::SpaceSensor::BinaryCommand &binaryCommand);

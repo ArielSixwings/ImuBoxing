@@ -43,7 +43,7 @@ namespace telemetry
 
         void SetEulerAngleDecompositionOrder();
 
-        bool LoopCallback();
+        void LoopCallback();
 
     private:
         int imuNumber = 3;

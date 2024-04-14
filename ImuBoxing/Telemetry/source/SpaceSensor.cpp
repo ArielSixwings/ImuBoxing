@@ -5,9 +5,34 @@
 #include <iomanip>
 #include <iterator>
 #include <sstream>
+#include <iostream>
 
 namespace telemetry
 {
+    SpaceSensor::BinaryResponse::BinaryResponse(const std::vector<uint8_t> &buffer,
+                                                const ResponsesSizes responseSize)
+    {
+        std::memcpy(&Status, buffer.data(), sizeof(uint8_t));
+
+        if (Status != 0x00)
+        {
+            return;
+        }
+
+        std::memcpy(&LogicalId, buffer.data() + sizeof(uint8_t), sizeof(uint8_t));
+        std::memcpy(&DataLength, buffer.data() + 2 * sizeof(uint8_t), sizeof(uint8_t));
+
+        if (DataLength != responseSize)
+        {
+            return;
+        }
+
+        std::ranges::copy(buffer.begin() + (ResponsesSizes::Header * sizeof(uint8_t)), buffer.end(),
+                          std::back_inserter(ResponseData));
+
+        m_isValid = true;
+    }
+
     std::string SpaceSensor::CreateImuCommand(int logicalId,
                                               int commandNumber,
                                               const std::vector<int> &arguments)
@@ -44,53 +69,28 @@ namespace telemetry
         return commandBuffer;
     }
 
-    std::vector<float> SpaceSensor::EulerAngle::Parse(std::vector<char> &buffer)
+    std::vector<float> SpaceSensor::ParseEulerAngle(const std::vector<uint8_t> &responseData)
     {
 
-        buffer.erase(std::remove(buffer.begin(), buffer.end(), ' '), buffer.end());
-        buffer.erase(std::remove_if(buffer.begin(), buffer.end(),
-                                    [](char byte)
-                                    { return not isalnum(byte) and byte != '.' and byte != ','; }),
-                     buffer.end());
-
         std::vector<float> angles;
-        std::string str(buffer.begin(), buffer.end());
-        size_t pos = 0;
 
-        while ((pos = str.find(',')) != std::string::npos)
+        if (responseData.size() < ResponsesSizes::EulerAngle)
         {
-            try
-            {
-                angles.push_back(std::stof(str.substr(0, pos)));
-                str.erase(0, pos + 1);
-            }
-            catch (const std::exception &e)
-            {
-                // std::cerr << e.what() << '\n';
-            }
+            return angles;
         }
+
+        float roll;
+        float pitch;
+        float yaw;
+
+        std::memcpy(&roll, responseData.data(), sizeof(float));
+        std::memcpy(&pitch, responseData.data() + sizeof(float), sizeof(float));
+        std::memcpy(&yaw, responseData.data() + 2 * sizeof(float), sizeof(float));
+
+        angles.push_back(roll);
+        angles.push_back(pitch);
+        angles.push_back(yaw);
 
         return angles;
     }
-}
-
-std::ostream &operator<<(std::ostream &os, const telemetry::SpaceSensor::BinaryCommand &binaryCommand)
-{
-    os << "BinaryCommand:" << std::endl;
-    os << "  StartOfPacket: 0x" << std::hex << std::setfill('0') << std::setw(2) << (int)binaryCommand.StartOfPacket << std::endl;
-    os << "  LogicalId: 0x" << std::hex << std::setfill('0') << std::setw(2) << (int)binaryCommand.LogicalId << std::endl;
-    os << "  Command: 0x" << std::hex << std::setfill('0') << std::setw(2) << (int)binaryCommand.Command << std::endl;
-
-    if (not binaryCommand.CommandData.empty())
-    {
-        os << "  CommandData: ";
-        for (uint8_t data : binaryCommand.CommandData)
-        {
-            os << "0x" << std::hex << std::setfill('0') << std::setw(2) << (int)data << " ";
-        }
-        os << std::endl;
-    }
-
-    os << "  Checksum: 0x" << std::hex << std::setfill('0') << std::setw(2) << (int)binaryCommand.CheckSum << std::endl;
-    return os;
 }

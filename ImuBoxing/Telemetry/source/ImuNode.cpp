@@ -239,13 +239,13 @@ namespace telemetry
                                                    {usedFrequency, -1, 0}));
     }
 
-    bool ImuNode::LoopCallback()
+    void ImuNode::LoopCallback()
     {
         if (not m_streaming)
         {
             RCLCPP_DEBUG(get_logger(), "Not streaming");
             std::this_thread::sleep_for(std::chrono::seconds(1));
-            return false;
+            return;
         }
 
         int bytesAvailable;
@@ -253,29 +253,37 @@ namespace telemetry
         if (ioctl(m_serialPort->native_handle(), FIONREAD, &bytesAvailable) == -1)
         {
             RCLCPP_ERROR(get_logger(), "native_handle failed");
-            return false;
+            return;
         }
 
-        if (static_cast<size_t>(bytesAvailable) < SpaceSensor::EulerAngle::SizeInBytes())
+        constexpr int eulerAngleBinaryResponseSize = (SpaceSensor::ResponsesSizes::Header + SpaceSensor::ResponsesSizes::EulerAngle);
+
+        if (bytesAvailable < eulerAngleBinaryResponseSize)
         {
-            RCLCPP_DEBUG(get_logger(), "No bytes available ");
-            return true;
+            RCLCPP_DEBUG(get_logger(), "Not enough bytes available");
+            return;
         }
 
-        std::vector<char> responseBuffer(128);
+        std::vector<uint8_t> responseBuffer;
 
         size_t bytesRead = m_serialPort->read_some(boost::asio::buffer(responseBuffer,
-                                                                       bytesAvailable));
+                                                                       eulerAngleBinaryResponseSize));
 
         if (bytesRead <= 0)
         {
-            RCLCPP_DEBUG(get_logger(), "No bytes read ");
-            return true;
+            RCLCPP_DEBUG(get_logger(), "No bytes read");
+            return;
         }
 
-        SpaceSensor::EulerAngle eulerAngle(0);
+        SpaceSensor::BinaryResponse binaryResponse(responseBuffer, SpaceSensor::ResponsesSizes::EulerAngle);
 
-        const auto angles = eulerAngle.Parse(responseBuffer);
+        if (not binaryResponse.IsValid())
+        {
+            RCLCPP_DEBUG(get_logger(), "Invalid response");
+            return;
+        }
+
+        const auto angles = SpaceSensor::ParseEulerAngle(binaryResponse.ResponseData);
 
         geometry_msgs::msg::Vector3 message;
         message.x = angles[0];
@@ -284,6 +292,6 @@ namespace telemetry
 
         m_publisher->publish(message);
 
-        return true;
+        return;
     }
 }

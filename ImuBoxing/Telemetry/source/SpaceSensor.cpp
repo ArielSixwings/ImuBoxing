@@ -1,9 +1,10 @@
 #include "SpaceSensor.h"
 
-#include <sstream>
-#include <cstring>
 #include <algorithm>
+#include <cstring>
+#include <iomanip>
 #include <iterator>
+#include <sstream>
 
 namespace telemetry
 {
@@ -71,4 +72,25 @@ namespace telemetry
 
         return angles;
     }
+}
+
+std::ostream &operator<<(std::ostream &os, const telemetry::SpaceSensor::BinaryCommand &binaryCommand)
+{
+    os << "BinaryCommand:" << std::endl;
+    os << "  StartOfPacket: 0x" << std::hex << std::setfill('0') << std::setw(2) << (int)binaryCommand.StartOfPacket << std::endl;
+    os << "  LogicalId: 0x" << std::hex << std::setfill('0') << std::setw(2) << (int)binaryCommand.LogicalId << std::endl;
+    os << "  Command: 0x" << std::hex << std::setfill('0') << std::setw(2) << (int)binaryCommand.Command << std::endl;
+
+    if (not binaryCommand.CommandData.empty())
+    {
+        os << "  CommandData: ";
+        for (uint8_t data : binaryCommand.CommandData)
+        {
+            os << "0x" << std::hex << std::setfill('0') << std::setw(2) << (int)data << " ";
+        }
+        os << std::endl;
+    }
+
+    os << "  Checksum: 0x" << std::hex << std::setfill('0') << std::setw(2) << (int)binaryCommand.CheckSum << std::endl;
+    return os;
 }

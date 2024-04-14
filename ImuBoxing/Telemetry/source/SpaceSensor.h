@@ -86,7 +86,7 @@ namespace telemetry
                   Command(command),
                   CommandData(commandData)
             {
-                CheckSum = Command + std::accumulate(commandData.begin(), commandData.end(), 0);
+                CheckSum = (LogicalId + Command + std::accumulate(commandData.begin(), commandData.end(), 0)) % 256;
             }
 
             std::vector<uint8_t> Get();
@@ -126,3 +126,5 @@ namespace telemetry
                                             const std::vector<int> &arguments = {});
     };
 }
+
+std::ostream &operator<<(std::ostream &os, const telemetry::SpaceSensor::BinaryCommand &binaryCommand);

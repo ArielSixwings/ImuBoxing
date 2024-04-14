@@ -1,7 +1,5 @@
 #include "ImuNode.h"
 
-#include "SpaceSensor.h"
-
 #include <sstream>
 #include <thread>
 #include <ranges>
@@ -82,6 +80,26 @@ namespace telemetry
         }
     }
 
+    void ImuNode::ApplyCommand(SpaceSensor::BinaryCommand &binaryCommand, bool showResponse)
+    {
+        m_serialPort->write_some(boost::asio::buffer(binaryCommand.Get()));
+
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
+        if (showResponse)
+        {
+            std::vector<char> responseBuffer(128);
+
+            size_t bytesRead = m_serialPort->read_some(boost::asio::buffer(responseBuffer));
+
+            if (bytesRead > 0)
+            {
+                std::string response(responseBuffer.begin(), responseBuffer.begin() + bytesRead);
+                RCLCPP_INFO(get_logger(), ">> %s", response.c_str());
+            }
+        }
+    }
+
     void ImuNode::StartStreaming([[maybe_unused]] const std::shared_ptr<std_srvs::srv::Empty::Request> request,
                                  [[maybe_unused]] std::shared_ptr<std_srvs::srv::Empty::Response> response)
     {
@@ -94,13 +112,10 @@ namespace telemetry
 
         RCLCPP_INFO(get_logger(), "Start Streaming");
 
-        std::vector<int> imuNumbers = {3};
-
-        for (auto id : imuNumbers)
-        {
-            auto command = SpaceSensor::CreateImuCommand(id, SpaceSensor::Commands::StartStreaming);
-            ApplyCommand(command);
-        }
+        SpaceSensor::BinaryCommand binaryCommand(SpaceSensor::ValidateMode::Simple,
+                                                 0x03,
+                                                 SpaceSensor::Commands::StartStreaming);
+        ApplyCommand(binaryCommand);
 
         m_streaming = true;
     }
@@ -117,13 +132,10 @@ namespace telemetry
 
         RCLCPP_INFO(get_logger(), "Stop Streaming");
 
-        std::vector<int> imuNumbers = {3};
-
-        for (auto id : imuNumbers)
-        {
-            auto command = SpaceSensor::CreateImuCommand(id, SpaceSensor::Commands::StopStreaming);
-            ApplyCommand(command);
-        }
+        SpaceSensor::BinaryCommand binaryCommand(SpaceSensor::ValidateMode::Simple,
+                                                 0x03,
+                                                 SpaceSensor::Commands::StopStreaming);
+        ApplyCommand(binaryCommand);
 
         m_streaming = false;
     }
@@ -134,13 +146,10 @@ namespace telemetry
 
         RCLCPP_INFO(get_logger(), "Tare Sensor");
 
-        std::vector<int> imuNumbers = {3};
-
-        for (auto id : imuNumbers)
-        {
-            auto command = SpaceSensor::CreateImuCommand(id, SpaceSensor::Commands::TareWithCurrentOrientation);
-            ApplyCommand(command);
-        }
+        SpaceSensor::BinaryCommand binaryCommand(SpaceSensor::ValidateMode::Simple,
+                                                 0x03,
+                                                 SpaceSensor::Commands::TareWithCurrentOrientation);
+        ApplyCommand(binaryCommand);
     }
 
     void ImuNode::TareSensorQuaternion([[maybe_unused]] const std::shared_ptr<std_srvs::srv::Empty::Request> request,
@@ -149,13 +158,11 @@ namespace telemetry
 
         RCLCPP_INFO(get_logger(), "Tare Sensor Quaternion");
 
-        std::vector<int> imuNumbers = {3};
+        SpaceSensor::BinaryCommand binaryCommand(SpaceSensor::ValidateMode::Simple,
+                                                 0x03,
+                                                 SpaceSensor::Commands::TareWithQuaternion);
 
-        for (auto id : imuNumbers)
-        {
-            auto command = SpaceSensor::CreateImuCommand(id, SpaceSensor::Commands::TareWithQuaternion);
-            ApplyCommand(command);
-        }
+        ApplyCommand(binaryCommand);
     }
 
     void ImuNode::OffsetWithCurrentOrientation([[maybe_unused]] const std::shared_ptr<std_srvs::srv::Empty::Request> request,
@@ -164,13 +171,10 @@ namespace telemetry
 
         RCLCPP_INFO(get_logger(), "Offset with current orientation");
 
-        std::vector<int> imuNumbers = {3};
-
-        for (auto id : imuNumbers)
-        {
-            auto command = SpaceSensor::CreateImuCommand(id, SpaceSensor::Commands::OffsetWithCurrentOrientation);
-            ApplyCommand(command);
-        }
+        SpaceSensor::BinaryCommand binaryCommand(SpaceSensor::ValidateMode::Simple,
+                                                 0x03,
+                                                 SpaceSensor::Commands::OffsetWithCurrentOrientation);
+        ApplyCommand(binaryCommand);
     }
 
     void ImuNode::SetBaseOffsetWithCurrentOrientation([[maybe_unused]] const std::shared_ptr<std_srvs::srv::Empty::Request> request,
@@ -179,28 +183,24 @@ namespace telemetry
 
         RCLCPP_INFO(get_logger(), "Offset with current orientation");
 
-        std::vector<int> imuNumbers = {3};
+        SpaceSensor::BinaryCommand binaryCommand(SpaceSensor::ValidateMode::Simple,
+                                                 0x03,
+                                                 SpaceSensor::Commands::SetBaseOffsetWithCurrentOrientation);
 
-        for (auto id : imuNumbers)
-        {
-            auto command = SpaceSensor::CreateImuCommand(id, SpaceSensor::Commands::SetBaseOffsetWithCurrentOrientation);
-            ApplyCommand(command);
-        }
+        ApplyCommand(binaryCommand);
     }
 
-    void ImuNode::SetStreamingSlots(const std::vector<int> &arguments)
+    void ImuNode::SetStreamingSlots(const std::vector<uint8_t> &commandData)
     {
 
         RCLCPP_INFO(get_logger(), "Set Streaming Slots");
 
-        std::vector<int> imuNumbers = {3};
+        SpaceSensor::BinaryCommand binaryCommand(SpaceSensor::ValidateMode::Simple,
+                                                 0x03,
+                                                 SpaceSensor::Commands::SetStreamingSlots,
+                                                 commandData);
 
-        for (auto id : imuNumbers)
-        {
-            ApplyCommand(SpaceSensor::CreateImuCommand(id,
-                                                       SpaceSensor::Commands::SetStreamingSlots,
-                                                       arguments));
-        }
+        ApplyCommand(binaryCommand);
     }
 
     void ImuNode::SetCompassEnabledToZero()
@@ -208,14 +208,11 @@ namespace telemetry
 
         RCLCPP_INFO(get_logger(), "Set Compass Enabled to 0");
 
-        std::vector<int> imuNumbers = {3};
-
-        for (auto id : imuNumbers)
-        {
-            ApplyCommand(SpaceSensor::CreateImuCommand(id,
-                                                       SpaceSensor::Commands::SetCompassEnabled,
-                                                       {0}));
-        }
+        SpaceSensor::BinaryCommand binaryCommand(SpaceSensor::ValidateMode::Simple,
+                                                 0x03,
+                                                 SpaceSensor::Commands::SetCompassEnabled,
+                                                 {0});
+        ApplyCommand(binaryCommand);
     }
 
     void ImuNode::SetEulerAngleDecompositionOrder()
@@ -223,14 +220,11 @@ namespace telemetry
 
         RCLCPP_INFO(get_logger(), "Set Euler Angle Decomposition Order");
 
-        std::vector<int> imuNumbers = {3};
-
-        for (auto id : imuNumbers)
-        {
-            ApplyCommand(SpaceSensor::CreateImuCommand(id,
-                                                       SpaceSensor::Commands::SetEulerAngleDecompositionOrder,
-                                                       {5}));
-        }
+        SpaceSensor::BinaryCommand binaryCommand(SpaceSensor::ValidateMode::Simple,
+                                                 0x03,
+                                                 SpaceSensor::Commands::SetEulerAngleDecompositionOrder,
+                                                 {5});
+        ApplyCommand(binaryCommand);
     }
 
     void ImuNode::SetStreamingTiming(const int frequency)
@@ -238,16 +232,11 @@ namespace telemetry
 
         RCLCPP_INFO(get_logger(), "Set Streaming timing");
 
-        std::vector<int> imuNumbers = {3};
-
         const auto usedFrequency = frequency > 0 ? (1000000 / frequency) : 0;
 
-        for (auto id : imuNumbers)
-        {
-            ApplyCommand(SpaceSensor::CreateImuCommand(id,
-                                                       SpaceSensor::Commands::SetStreamingTiming,
-                                                       {usedFrequency, -1, 0}));
-        }
+        ApplyCommand(SpaceSensor::CreateImuCommand({3},
+                                                   SpaceSensor::Commands::SetStreamingTiming,
+                                                   {usedFrequency, -1, 0}));
     }
 
     bool ImuNode::LoopCallback()

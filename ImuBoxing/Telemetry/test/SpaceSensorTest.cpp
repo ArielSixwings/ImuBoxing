@@ -1,5 +1,8 @@
 #include "SpaceSensor.h"
 
+#include <algorithm>
+
+#include <catch2/catch_approx.hpp>
 #include <catch2/catch_test_macros.hpp>
 
 using namespace telemetry;
@@ -69,6 +72,24 @@ SCENARIO("Should parse a response data to an Euler Angle", "[Unit][SpaceSensor]"
         const std::vector<float> anglesCompare = {90.0, 45.0, 10.10};
 
         CHECK(angles == anglesCompare);
+      }
+    }
+  }
+
+  GIVEN("A vector of bytes representing angles 1.5708, 0.7854, 0.17628 in rad")
+  {
+    const std::vector<uint8_t> responseData = {0xdb, 0x0f, 0xc9, 0x3f, 0xdb, 0x0f, 0x49, 0x3f, 0x49, 0x82, 0x34, 0x3e};
+
+    WHEN("ParseEulerAngle is called")
+    {
+      auto angles = SpaceSensor::ParseEulerAngle(responseData);
+
+      THEN("Resulting angles is a std::vector<float> with 1.5708, 0.7854, 0.17628")
+      {
+        const std::vector<float> anglesCompare = {1.5708, 0.7854, 0.17628};
+
+        CHECK(std::ranges::equal(angles, anglesCompare, [](float angle, float angleCompare)
+                                 { return angle == Catch::Approx(angleCompare); }));
       }
     }
   }

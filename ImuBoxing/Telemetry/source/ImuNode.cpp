@@ -1,7 +1,5 @@
 #include "ImuNode.h"
 
-#include "SpaceSensor.h"
-
 #include <sstream>
 #include <thread>
 #include <ranges>
@@ -62,26 +60,24 @@ namespace telemetry
                                     std::bind(&ImuNode::LoopCallback, this));
     }
 
-    void ImuNode::ApplyCommand(const std::string &command, bool showResponse)
+    void ImuNode::ApplyCommand(SpaceSensor::BinaryCommand &binaryCommand, bool showResponse)
     {
-        m_serialPort->write_some(boost::asio::buffer(command));
+        m_serialPort->write_some(boost::asio::buffer(binaryCommand.Get()));
 
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
         if (showResponse)
         {
-            std::vector<char> responseBuffer(128);
+            std::vector<uint8_t> responseBuffer(128);
 
-            size_t bytesRead = m_serialPort->read_some(boost::asio::buffer(responseBuffer));
+            int bytesRead = m_serialPort->read_some(boost::asio::buffer(responseBuffer));
 
             if (bytesRead > 0)
             {
-                std::string response(responseBuffer.begin(), responseBuffer.begin() + bytesRead);
-                RCLCPP_INFO(get_logger(), ">> %s", response.c_str());
+                std::ranges::for_each(responseBuffer, [&](const auto byte)
+                                      { RCLCPP_INFO(get_logger(), ">> %X", byte); });
             }
         }
-
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
 
     void ImuNode::StartStreaming([[maybe_unused]] const std::shared_ptr<std_srvs::srv::Empty::Request> request,
@@ -96,13 +92,10 @@ namespace telemetry
 
         RCLCPP_INFO(get_logger(), "Start Streaming");
 
-        std::vector<int> imuNumbers = {3};
-
-        for (auto id : imuNumbers)
-        {
-            auto command = SpaceSensor::CreateImuCommand(id, SpaceSensor::Commands::StartStreaming);
-            ApplyCommand(command);
-        }
+        SpaceSensor::BinaryCommand binaryCommand(SpaceSensor::ValidateMode::Simple,
+                                                 0x03,
+                                                 SpaceSensor::Commands::StartStreaming);
+        ApplyCommand(binaryCommand);
 
         m_streaming = true;
     }
@@ -119,45 +112,37 @@ namespace telemetry
 
         RCLCPP_INFO(get_logger(), "Stop Streaming");
 
-        std::vector<int> imuNumbers = {3};
-
-        for (auto id : imuNumbers)
-        {
-            auto command = SpaceSensor::CreateImuCommand(id, SpaceSensor::Commands::StopStreaming);
-            ApplyCommand(command);
-        }
+        SpaceSensor::BinaryCommand binaryCommand(SpaceSensor::ValidateMode::Simple,
+                                                 0x03,
+                                                 SpaceSensor::Commands::StopStreaming);
+        ApplyCommand(binaryCommand);
 
         m_streaming = false;
     }
 
     void ImuNode::TareSensor([[maybe_unused]] const std::shared_ptr<std_srvs::srv::Empty::Request> request,
                              [[maybe_unused]] std::shared_ptr<std_srvs::srv::Empty::Response> response)
-    {
 
+    {
         RCLCPP_INFO(get_logger(), "Tare Sensor");
 
-        std::vector<int> imuNumbers = {3};
-
-        for (auto id : imuNumbers)
-        {
-            auto command = SpaceSensor::CreateImuCommand(id, SpaceSensor::Commands::TareWithCurrentOrientation);
-            ApplyCommand(command);
-        }
+        SpaceSensor::BinaryCommand binaryCommand(SpaceSensor::ValidateMode::Simple,
+                                                 0x03,
+                                                 SpaceSensor::Commands::TareWithCurrentOrientation);
+        ApplyCommand(binaryCommand);
     }
 
     void ImuNode::TareSensorQuaternion([[maybe_unused]] const std::shared_ptr<std_srvs::srv::Empty::Request> request,
-                                       [[maybe_unused]] std::shared_ptr<std_srvs::srv::Empty::Response> response)
+                                       [[maybe_unused]] std::shared_ptr<std_srvs::srv::Empty::Response> response) // TODO, implement quaternion parameter
     {
 
         RCLCPP_INFO(get_logger(), "Tare Sensor Quaternion");
 
-        std::vector<int> imuNumbers = {3};
+        SpaceSensor::BinaryCommand binaryCommand(SpaceSensor::ValidateMode::Simple,
+                                                 0x03,
+                                                 SpaceSensor::Commands::TareWithQuaternion);
 
-        for (auto id : imuNumbers)
-        {
-            auto command = SpaceSensor::CreateImuCommand(id, SpaceSensor::Commands::TareWithQuaternion);
-            ApplyCommand(command);
-        }
+        ApplyCommand(binaryCommand);
     }
 
     void ImuNode::OffsetWithCurrentOrientation([[maybe_unused]] const std::shared_ptr<std_srvs::srv::Empty::Request> request,
@@ -166,13 +151,10 @@ namespace telemetry
 
         RCLCPP_INFO(get_logger(), "Offset with current orientation");
 
-        std::vector<int> imuNumbers = {3};
-
-        for (auto id : imuNumbers)
-        {
-            auto command = SpaceSensor::CreateImuCommand(id, SpaceSensor::Commands::OffsetWithCurrentOrientation);
-            ApplyCommand(command);
-        }
+        SpaceSensor::BinaryCommand binaryCommand(SpaceSensor::ValidateMode::Simple,
+                                                 0x03,
+                                                 SpaceSensor::Commands::OffsetWithCurrentOrientation);
+        ApplyCommand(binaryCommand);
     }
 
     void ImuNode::SetBaseOffsetWithCurrentOrientation([[maybe_unused]] const std::shared_ptr<std_srvs::srv::Empty::Request> request,
@@ -181,28 +163,24 @@ namespace telemetry
 
         RCLCPP_INFO(get_logger(), "Offset with current orientation");
 
-        std::vector<int> imuNumbers = {3};
+        SpaceSensor::BinaryCommand binaryCommand(SpaceSensor::ValidateMode::Simple,
+                                                 0x03,
+                                                 SpaceSensor::Commands::SetBaseOffsetWithCurrentOrientation);
 
-        for (auto id : imuNumbers)
-        {
-            auto command = SpaceSensor::CreateImuCommand(id, SpaceSensor::Commands::SetBaseOffsetWithCurrentOrientation);
-            ApplyCommand(command);
-        }
+        ApplyCommand(binaryCommand);
     }
 
-    void ImuNode::SetStreamingSlots(const std::vector<int> &arguments)
+    void ImuNode::SetStreamingSlots(const std::vector<uint8_t> &commandData)
     {
 
         RCLCPP_INFO(get_logger(), "Set Streaming Slots");
 
-        std::vector<int> imuNumbers = {3};
+        SpaceSensor::BinaryCommand binaryCommand(SpaceSensor::ValidateMode::Simple,
+                                                 0x03,
+                                                 SpaceSensor::Commands::SetStreamingSlots,
+                                                 commandData);
 
-        for (auto id : imuNumbers)
-        {
-            ApplyCommand(SpaceSensor::CreateImuCommand(id,
-                                                       SpaceSensor::Commands::SetStreamingSlots,
-                                                       arguments));
-        }
+        ApplyCommand(binaryCommand);
     }
 
     void ImuNode::SetCompassEnabledToZero()
@@ -210,14 +188,11 @@ namespace telemetry
 
         RCLCPP_INFO(get_logger(), "Set Compass Enabled to 0");
 
-        std::vector<int> imuNumbers = {3};
-
-        for (auto id : imuNumbers)
-        {
-            ApplyCommand(SpaceSensor::CreateImuCommand(id,
-                                                       SpaceSensor::Commands::SetCompassEnabled,
-                                                       {0}));
-        }
+        SpaceSensor::BinaryCommand binaryCommand(SpaceSensor::ValidateMode::Simple,
+                                                 0x03,
+                                                 SpaceSensor::Commands::SetCompassEnabled,
+                                                 {0x00});
+        ApplyCommand(binaryCommand);
     }
 
     void ImuNode::SetEulerAngleDecompositionOrder()
@@ -225,40 +200,32 @@ namespace telemetry
 
         RCLCPP_INFO(get_logger(), "Set Euler Angle Decomposition Order");
 
-        std::vector<int> imuNumbers = {3};
-
-        for (auto id : imuNumbers)
-        {
-            ApplyCommand(SpaceSensor::CreateImuCommand(id,
-                                                       SpaceSensor::Commands::SetEulerAngleDecompositionOrder,
-                                                       {5}));
-        }
+        SpaceSensor::BinaryCommand binaryCommand(SpaceSensor::ValidateMode::Simple,
+                                                 0x03,
+                                                 SpaceSensor::Commands::SetEulerAngleDecompositionOrder,
+                                                 {0x05});
+        ApplyCommand(binaryCommand);
     }
 
-    void ImuNode::SetStreamingTiming(const int frequency)
+    void ImuNode::SetStreamingTiming([[maybe_unused]] const int frequency)
     {
 
         RCLCPP_INFO(get_logger(), "Set Streaming timing");
 
-        std::vector<int> imuNumbers = {3};
-
-        const auto usedFrequency = frequency > 0 ? (1000000 / frequency) : 0;
-
-        for (auto id : imuNumbers)
-        {
-            ApplyCommand(SpaceSensor::CreateImuCommand(id,
-                                                       SpaceSensor::Commands::SetStreamingTiming,
-                                                       {usedFrequency, -1, 0}));
-        }
+        SpaceSensor::BinaryCommand binaryCommand(SpaceSensor::ValidateMode::Simple,
+                                                 0x03,
+                                                 SpaceSensor::Commands::SetStreamingTiming,
+                                                 {0x00, 0x00, 0x27, 0x10, 0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00});
+        ApplyCommand(binaryCommand);
     }
 
-    bool ImuNode::LoopCallback()
+    void ImuNode::LoopCallback()
     {
         if (not m_streaming)
         {
-            RCLCPP_DEBUG(get_logger(), "Not streaming");
+            RCLCPP_INFO(get_logger(), "Not streaming");
             std::this_thread::sleep_for(std::chrono::seconds(1));
-            return false;
+            return;
         }
 
         int bytesAvailable;
@@ -266,29 +233,49 @@ namespace telemetry
         if (ioctl(m_serialPort->native_handle(), FIONREAD, &bytesAvailable) == -1)
         {
             RCLCPP_ERROR(get_logger(), "native_handle failed");
-            return false;
+            return;
         }
 
-        if (static_cast<size_t>(bytesAvailable) < SpaceSensor::EulerAngle::SizeInBytes())
+        constexpr int eulerAngleBinaryResponseSize = (SpaceSensor::ResponsesSizes::Header + SpaceSensor::ResponsesSizes::EulerAngle);
+
+        if (bytesAvailable < eulerAngleBinaryResponseSize)
         {
-            RCLCPP_DEBUG(get_logger(), "No bytes available ");
-            return true;
+            RCLCPP_INFO(get_logger(), "Not enough bytes available");
+            return;
         }
 
-        std::vector<char> responseBuffer(128);
+        std::vector<uint8_t> responseBuffer(15);
 
-        size_t bytesRead = m_serialPort->read_some(boost::asio::buffer(responseBuffer,
-                                                                       bytesAvailable));
+        const auto bytesRead = m_serialPort->read_some(boost::asio::buffer(responseBuffer,
+                                                                           eulerAngleBinaryResponseSize));
 
         if (bytesRead <= 0)
         {
-            RCLCPP_DEBUG(get_logger(), "No bytes read ");
-            return true;
+            RCLCPP_INFO(get_logger(), "No bytes read");
+            return;
         }
 
-        SpaceSensor::EulerAngle eulerAngle(0);
+        SpaceSensor::BinaryResponse binaryResponse(responseBuffer, SpaceSensor::ResponsesSizes::EulerAngle);
 
-        const auto angles = eulerAngle.Parse(responseBuffer);
+        if (not binaryResponse.IsValid())
+        {
+
+            m_serialPort->read_some(boost::asio::buffer(responseBuffer,
+                                                        1));
+
+            return;
+        }
+
+        for (size_t i = 0; i < responseBuffer.size(); ++i)
+        {
+            std::cout << "0x" << std::setfill('0') << std::setw(2) << std::hex << static_cast<int>(responseBuffer[i]);
+            if (i != responseBuffer.size() - 1)
+                std::cout << ", ";
+        }
+
+        std::cout << std::endl;
+
+        const auto angles = SpaceSensor::ParseEulerAngle(binaryResponse.ResponseData);
 
         geometry_msgs::msg::Vector3 message;
         message.x = angles[0];
@@ -297,6 +284,6 @@ namespace telemetry
 
         m_publisher->publish(message);
 
-        return true;
+        return;
     }
 }

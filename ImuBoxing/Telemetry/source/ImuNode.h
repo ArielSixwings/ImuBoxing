@@ -1,5 +1,7 @@
 #pragma once
 
+#include "SpaceSensor.h"
+
 #include <rclcpp/rclcpp.hpp>
 #include <std_srvs/srv/empty.hpp>
 #include <boost/asio.hpp>
@@ -30,17 +32,17 @@ namespace telemetry
         void SetBaseOffsetWithCurrentOrientation(const std::shared_ptr<std_srvs::srv::Empty::Request> request,
                                                  std::shared_ptr<std_srvs::srv::Empty::Response> response);
 
-        void SetStreamingSlots(const std::vector<int> &arguments);
+        void SetStreamingSlots(const std::vector<uint8_t> &commandData);
 
         void SetStreamingTiming(const int frequency);
 
-        void ApplyCommand(const std::string &command, bool showResponse = false);
+        void ApplyCommand(SpaceSensor::BinaryCommand &binaryCommand, bool showResponse = false);
 
         void SetCompassEnabledToZero();
 
         void SetEulerAngleDecompositionOrder();
 
-        bool LoopCallback();
+        void LoopCallback();
 
     private:
         int imuNumber = 3;

@@ -1,10 +1,44 @@
 #include "SpaceSensor.h"
 
-#include <sstream>
+#include <algorithm>
 #include <cstring>
+#include <iomanip>
+#include <iterator>
+#include <sstream>
+#include <iostream>
 
 namespace telemetry
 {
+    SpaceSensor::BinaryResponse::BinaryResponse(const std::vector<uint8_t> &buffer,
+                                                const ResponsesSizes responseSize)
+    {
+        std::memcpy(&Status, buffer.data(), sizeof(uint8_t));
+
+        if (Status != 0x00)
+        {
+            return;
+        }
+
+        std::memcpy(&LogicalId, buffer.data() + sizeof(uint8_t), sizeof(uint8_t));
+
+        if (LogicalId != 0x03)
+        {
+            return;
+        }
+
+        std::memcpy(&DataLength, buffer.data() + 2 * sizeof(uint8_t), sizeof(uint8_t));
+
+        if (DataLength != responseSize)
+        {
+            return;
+        }
+
+        std::ranges::copy(buffer.begin() + (ResponsesSizes::Header * sizeof(uint8_t)), buffer.end(),
+                          std::back_inserter(ResponseData));
+
+        m_isValid = true;
+    }
+
     std::string SpaceSensor::CreateImuCommand(int logicalId,
                                               int commandNumber,
                                               const std::vector<int> &arguments)
@@ -29,31 +63,43 @@ namespace telemetry
         return command.str();
     }
 
-    std::vector<float> SpaceSensor::EulerAngle::Parse(std::vector<char> &buffer)
+    std::vector<uint8_t> SpaceSensor::BinaryCommand::Get()
     {
+        std::vector<uint8_t> commandBuffer{StartOfPacket, LogicalId, Command};
 
-        buffer.erase(std::remove(buffer.begin(), buffer.end(), ' '), buffer.end());
-        buffer.erase(std::remove_if(buffer.begin(), buffer.end(),
-                                    [](char byte)
-                                    { return not isalnum(byte) and byte != '.' and byte != ','; }),
-                     buffer.end());
+        std::ranges::copy(CommandData.begin(), CommandData.end(),
+                          std::back_inserter(commandBuffer));
 
+        commandBuffer.push_back(CheckSum);
+
+        return commandBuffer;
+    }
+
+    std::vector<float> SpaceSensor::ParseEulerAngle(const std::vector<uint8_t> &responseData)
+    {
         std::vector<float> angles;
-        std::string str(buffer.begin(), buffer.end());
-        size_t pos = 0;
 
-        while ((pos = str.find(',')) != std::string::npos)
+        if (responseData.size() < ResponsesSizes::EulerAngle)
         {
-            try
-            {
-                angles.push_back(std::stof(str.substr(0, pos)));
-                str.erase(0, pos + 1);
-            }
-            catch (const std::exception &e)
-            {
-                // std::cerr << e.what() << '\n';
-            }
+            return angles;
         }
+
+        float roll;
+        float pitch;
+        float yaw;
+
+        std::memcpy(&roll, responseData.data(), sizeof(float));
+        std::reverse(reinterpret_cast<uint8_t *>(&roll), reinterpret_cast<uint8_t *>(&roll) + sizeof(float));
+
+        std::memcpy(&pitch, responseData.data() + sizeof(float), sizeof(float));
+        std::reverse(reinterpret_cast<uint8_t *>(&pitch), reinterpret_cast<uint8_t *>(&pitch) + sizeof(float));
+
+        std::memcpy(&yaw, responseData.data() + 2 * sizeof(float), sizeof(float));
+        std::reverse(reinterpret_cast<uint8_t *>(&yaw), reinterpret_cast<uint8_t *>(&yaw) + sizeof(float));
+
+        angles.push_back(roll);
+        angles.push_back(pitch);
+        angles.push_back(yaw);
 
         return angles;
     }

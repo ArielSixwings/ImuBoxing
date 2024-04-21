@@ -61,7 +61,7 @@ SCENARIO("Should parse a response data to an Euler Angle", "[Unit][SpaceSensor]"
 {
   GIVEN("A vector of bytes representing angles 90.0, 45.0, 10.10")
   {
-    const std::vector<uint8_t> responseData = {0x00, 0x00, 0xb4, 0x42, 0x00, 0x00, 0x34, 0x42, 0x9a, 0x99, 0x21, 0x41};
+    const std::vector<uint8_t> responseData = {0x42, 0xb4, 0x00, 0x00, 0x42, 0x34, 0x00, 0x00, 0x41, 0x21, 0x99, 0x9a};
 
     WHEN("ParseEulerAngle is called")
     {
@@ -76,9 +76,13 @@ SCENARIO("Should parse a response data to an Euler Angle", "[Unit][SpaceSensor]"
     }
   }
 
-  GIVEN("A vector of bytes representing angles 1.5708, 0.7854, 0.17628 in rad")
+  GIVEN("A vector of bytes representing angles 1.5708, 0.0, 0.17628 in rad")
   {
-    const std::vector<uint8_t> responseData = {0xdb, 0x0f, 0xc9, 0x3f, 0xdb, 0x0f, 0x49, 0x3f, 0x49, 0x82, 0x34, 0x3e};
+    const std::vector<uint8_t> responseData = {
+        0x3F, 0xC9, 0x0F, 0xDB, // 1.5708
+        0x00, 0x00, 0x00, 0x00, // 0.0
+        0X3E, 0X34, 0X82, 0XBF  // 0.17628
+    };
 
     WHEN("ParseEulerAngle is called")
     {
@@ -86,7 +90,7 @@ SCENARIO("Should parse a response data to an Euler Angle", "[Unit][SpaceSensor]"
 
       THEN("Resulting angles is a std::vector<float> with 1.5708, 0.7854, 0.17628")
       {
-        const std::vector<float> anglesCompare = {1.5708, 0.7854, 0.17628};
+        const std::vector<float> anglesCompare = {1.5708, 0.0, 0.17628};
 
         CHECK(std::ranges::equal(angles, anglesCompare, [](float angle, float angleCompare)
                                  { return angle == Catch::Approx(angleCompare); }));

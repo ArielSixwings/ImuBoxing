@@ -20,6 +20,12 @@ namespace telemetry
         }
 
         std::memcpy(&LogicalId, buffer.data() + sizeof(uint8_t), sizeof(uint8_t));
+
+        if (LogicalId != 0x03)
+        {
+            return;
+        }
+
         std::memcpy(&DataLength, buffer.data() + 2 * sizeof(uint8_t), sizeof(uint8_t));
 
         if (DataLength != responseSize)
@@ -71,7 +77,6 @@ namespace telemetry
 
     std::vector<float> SpaceSensor::ParseEulerAngle(const std::vector<uint8_t> &responseData)
     {
-
         std::vector<float> angles;
 
         if (responseData.size() < ResponsesSizes::EulerAngle)
@@ -84,8 +89,13 @@ namespace telemetry
         float yaw;
 
         std::memcpy(&roll, responseData.data(), sizeof(float));
+        std::reverse(reinterpret_cast<uint8_t *>(&roll), reinterpret_cast<uint8_t *>(&roll) + sizeof(float));
+
         std::memcpy(&pitch, responseData.data() + sizeof(float), sizeof(float));
+        std::reverse(reinterpret_cast<uint8_t *>(&pitch), reinterpret_cast<uint8_t *>(&pitch) + sizeof(float));
+
         std::memcpy(&yaw, responseData.data() + 2 * sizeof(float), sizeof(float));
+        std::reverse(reinterpret_cast<uint8_t *>(&yaw), reinterpret_cast<uint8_t *>(&yaw) + sizeof(float));
 
         angles.push_back(roll);
         angles.push_back(pitch);

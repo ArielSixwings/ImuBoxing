@@ -37,7 +37,6 @@ namespace telemetry
         void SetStreamingTiming(const int frequency);
 
         void ApplyCommand(SpaceSensor::BinaryCommand &binaryCommand, bool showResponse = false);
-        void ApplyCommand(const std::string &command, bool showResponse = false);
 
         void SetCompassEnabledToZero();
 

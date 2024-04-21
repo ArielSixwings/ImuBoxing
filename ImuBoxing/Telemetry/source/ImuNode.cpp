@@ -60,26 +60,6 @@ namespace telemetry
                                     std::bind(&ImuNode::LoopCallback, this));
     }
 
-    void ImuNode::ApplyCommand(const std::string &command, bool showResponse)
-    {
-        m_serialPort->write_some(boost::asio::buffer(command));
-
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
-
-        if (showResponse)
-        {
-            std::vector<char> responseBuffer(128);
-
-            size_t bytesRead = m_serialPort->read_some(boost::asio::buffer(responseBuffer));
-
-            if (bytesRead > 0)
-            {
-                std::string response(responseBuffer.begin(), responseBuffer.begin() + bytesRead);
-                RCLCPP_INFO(get_logger(), ">> %s", response.c_str());
-            }
-        }
-    }
-
     void ImuNode::ApplyCommand(SpaceSensor::BinaryCommand &binaryCommand, bool showResponse)
     {
         m_serialPort->write_some(boost::asio::buffer(binaryCommand.Get()));
@@ -88,9 +68,9 @@ namespace telemetry
 
         if (showResponse)
         {
-            std::vector<uint8_t> responseBuffer;
+            std::vector<uint8_t> responseBuffer(128);
 
-            size_t bytesRead = m_serialPort->read_some(boost::asio::buffer(responseBuffer));
+            int bytesRead = m_serialPort->read_some(boost::asio::buffer(responseBuffer));
 
             if (bytesRead > 0)
             {
@@ -142,8 +122,8 @@ namespace telemetry
 
     void ImuNode::TareSensor([[maybe_unused]] const std::shared_ptr<std_srvs::srv::Empty::Request> request,
                              [[maybe_unused]] std::shared_ptr<std_srvs::srv::Empty::Response> response)
-    {
 
+    {
         RCLCPP_INFO(get_logger(), "Tare Sensor");
 
         SpaceSensor::BinaryCommand binaryCommand(SpaceSensor::ValidateMode::Simple,
@@ -232,12 +212,6 @@ namespace telemetry
 
         RCLCPP_INFO(get_logger(), "Set Streaming timing");
 
-        // const auto usedFrequency = frequency > 0 ? (1000000 / frequency) : 0;
-
-        // ApplyCommand(SpaceSensor::CreateImuCommand({3},
-        //                                            SpaceSensor::Commands::SetStreamingTiming,
-        //                                            {usedFrequency, -1, 0}));
-
         SpaceSensor::BinaryCommand binaryCommand(SpaceSensor::ValidateMode::Simple,
                                                  0x03,
                                                  SpaceSensor::Commands::SetStreamingTiming,
@@ -249,7 +223,7 @@ namespace telemetry
     {
         if (not m_streaming)
         {
-            RCLCPP_DEBUG(get_logger(), "Not streaming");
+            RCLCPP_INFO(get_logger(), "Not streaming");
             std::this_thread::sleep_for(std::chrono::seconds(1));
             return;
         }
@@ -266,18 +240,18 @@ namespace telemetry
 
         if (bytesAvailable < eulerAngleBinaryResponseSize)
         {
-            RCLCPP_DEBUG(get_logger(), "Not enough bytes available");
+            RCLCPP_INFO(get_logger(), "Not enough bytes available");
             return;
         }
 
-        std::vector<uint8_t> responseBuffer;
+        std::vector<uint8_t> responseBuffer(15);
 
-        size_t bytesRead = m_serialPort->read_some(boost::asio::buffer(responseBuffer,
-                                                                       eulerAngleBinaryResponseSize));
+        const auto bytesRead = m_serialPort->read_some(boost::asio::buffer(responseBuffer,
+                                                                           eulerAngleBinaryResponseSize));
 
         if (bytesRead <= 0)
         {
-            RCLCPP_DEBUG(get_logger(), "No bytes read");
+            RCLCPP_INFO(get_logger(), "No bytes read");
             return;
         }
 
@@ -285,9 +259,21 @@ namespace telemetry
 
         if (not binaryResponse.IsValid())
         {
-            RCLCPP_DEBUG(get_logger(), "Invalid response");
+
+            m_serialPort->read_some(boost::asio::buffer(responseBuffer,
+                                                        1));
+
             return;
         }
+
+        for (size_t i = 0; i < responseBuffer.size(); ++i)
+        {
+            std::cout << "0x" << std::setfill('0') << std::setw(2) << std::hex << static_cast<int>(responseBuffer[i]);
+            if (i != responseBuffer.size() - 1)
+                std::cout << ", ";
+        }
+
+        std::cout << std::endl;
 
         const auto angles = SpaceSensor::ParseEulerAngle(binaryResponse.ResponseData);
 

@@ -1,5 +1,4 @@
-#include "Telemetry/source/ImuNode.h"
-#include "Classifier/source/Subscriber.h"
+#include "source/ImuNode.h"
 
 #include <thread>
 
@@ -9,25 +8,20 @@ int main(int argc, char *argv[])
 
     try
     {
-
         auto node = std::make_shared<telemetry::ImuNode>();
-
-        auto subscriber = std::make_shared<classifier::ImuSubscriber>();
 
         std::thread spin_thread([node]()
                                 { rclcpp::spin(node); });
 
-        rclcpp::spin(subscriber);
-
-        // spin_thread.join();
+        spin_thread.join();
     }
     catch (const std::exception &e)
     {
-        RCLCPP_ERROR(rclcpp::get_logger("main"), "Exception thrown: %s", e.what());
+        RCLCPP_ERROR(rclcpp::get_logger("ImuNode"), "Exception thrown: %s", e.what());
     }
     catch (...)
     {
-        RCLCPP_ERROR(rclcpp::get_logger("main"), "Unknown exception thrown");
+        RCLCPP_ERROR(rclcpp::get_logger("ImuNode"), "Unknown exception thrown");
     }
 
     rclcpp::shutdown();

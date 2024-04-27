@@ -21,5 +21,5 @@ find_package(Boost REQUIRED COMPONENTS system thread)
 add_subdirectory(Telemetry)
 add_subdirectory(Classifier)
 
-add_executable(boxingModule main.cpp)
+add_executable(boxingModule Telemetry/main.cpp)
 target_link_libraries(boxingModule Boost::system Boost::thread telemetrySource classifierSource)

@@ -283,7 +283,5 @@ namespace telemetry
         message.z = angles[2];
 
         m_publisher->publish(message);
-
-        return;
     }
 }

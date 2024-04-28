@@ -1,7 +1,7 @@
 #include "strategy/Knn.h"
+#include "DataDefinition.h"
 
 #include <algorithm>
-#include <iostream>
 #include <random>
 #include <ranges>
 
@@ -35,12 +35,12 @@ SCENARIO("Should add data to a Knn Object", "[Unit][strategy][Knn][AddData][GetD
                 features.push_back(group);
             }
 
-            std::vector<classifier::strategy::Knn::Data> group;
+            std::vector<classifier::strategy::Data> group;
 
             std::ranges::transform(features,
                                    std::back_inserter(group),
                                    [](const auto &feature)
-                                   { return classifier::strategy::Knn::Data(feature, 0); });
+                                   { return classifier::strategy::Data(feature, 0); });
 
             WHEN("AddData is called")
             {
@@ -55,47 +55,45 @@ SCENARIO("Should add data to a Knn Object", "[Unit][strategy][Knn][AddData][GetD
     }
 }
 
-SCENARIO("Should compute the euclidean distance between two Data",
-         "[Unit][strategy][Knn][Data][EuclideanDistance]")
-{
-    GIVEN("a Data at 90.0, 0.0, 45.0")
-    {
-        classifier::strategy::Knn::Data dataA({90.0, 0.0, 45.0}, 30);
-
-        AND_GIVEN("A Data at 0.0, 90.0, 90.0")
-        {
-            classifier::strategy::Knn::Data dataB({0.0, 90.0, 90.0}, 8);
-
-            WHEN("EuclideanDistance is called")
-            {
-                const auto result = dataA.EuclideanDistance(dataB);
-
-                THEN("Resulting LabeledDistance has expected value")
-                {
-                    classifier::strategy::Knn::LabeledDistance compare(135.0, 8);
-
-                    CHECK(result == compare);
-                }
-            }
-        }
-    }
-}
-
 SCENARIO("Should Classify the data according to the Knn rule", "[Unit][strategy][Knn][Classify]")
 {
-    GIVEN("a knn Object")
+
+    GIVEN("a vector of Data centered at 90.0, 0.0, 45.0")
     {
+        std::vector<std::vector<double>> features1;
 
-        classifier::strategy::Knn knn(3);
-
-        AND_GIVEN("a vector of Data centered at 90.0, 0.0, 45.0")
+        for (int i = 0; i < 10; ++i)
         {
-            std::vector<std::vector<double>> features1;
 
+            std::vector<double> point = {90.0, 0.0, 45.0};
+
+            std::random_device randomDevice;
+            std::mt19937 generator(randomDevice());
+            std::uniform_real_distribution<double> distribution(-5.0, 5.0);
+
+            double randomValue = distribution(generator);
+
+            std::ranges::for_each(point, [&randomValue](auto &entry)
+                                  { entry += randomValue; });
+
+            features1.push_back(point);
+        }
+
+        std::vector<classifier::strategy::Data> group;
+
+        std::ranges::transform(features1,
+                               std::back_inserter(group),
+                               [](const auto &feature)
+                               { return classifier::strategy::Data(feature, 5); });
+
+        AND_GIVEN("a vector of Data centered at 0.0, 90.0, 90.0")
+        {
+
+            std::vector<std::vector<double>> features2;
             for (int i = 0; i < 10; ++i)
             {
 
-                std::vector<double> point = {90.0, 0.0, 45.0};
+                std::vector<double> point = {0.0, 90.0, 90.0};
 
                 std::random_device randomDevice;
                 std::mt19937 generator(randomDevice());
@@ -106,47 +104,23 @@ SCENARIO("Should Classify the data according to the Knn rule", "[Unit][strategy]
                 std::ranges::for_each(point, [&randomValue](auto &entry)
                                       { entry += randomValue; });
 
-                features1.push_back(point);
+                features2.push_back(point);
             }
 
-            std::vector<classifier::strategy::Knn::Data> group;
-
-            std::ranges::transform(features1,
+            std::ranges::transform(features2,
                                    std::back_inserter(group),
                                    [](const auto &feature)
-                                   { return classifier::strategy::Knn::Data(feature, 5); });
+                                   { return classifier::strategy::Data(feature, 30); });
 
-            AND_GIVEN("a vector of Data centered at 0.0, 90.0, 90.0")
+            AND_GIVEN("a knn Object")
             {
 
-                std::vector<std::vector<double>> features2;
-                for (int i = 0; i < 10; ++i)
-                {
-
-                    std::vector<double> point = {0.0, 90.0, 90.0};
-
-                    std::random_device randomDevice;
-                    std::mt19937 generator(randomDevice());
-                    std::uniform_real_distribution<double> distribution(-5.0, 5.0);
-
-                    double randomValue = distribution(generator);
-
-                    std::ranges::for_each(point, [&randomValue](auto &entry)
-                                          { entry += randomValue; });
-
-                    features2.push_back(point);
-                }
-
-                std::ranges::transform(features2,
-                                       std::back_inserter(group),
-                                       [](const auto &feature)
-                                       { return classifier::strategy::Knn::Data(feature, 30); });
-
+                classifier::strategy::Knn knn(3);
                 knn.AddData(group);
 
                 AND_GIVEN("A Data at 0.0, 85.0, 85.0")
                 {
-                    classifier::strategy::Knn::Data dataPoint({0.0, 85.0, 85.0}, 100);
+                    classifier::strategy::Data dataPoint({0.0, 85.0, 85.0}, 100);
 
                     WHEN("Classify is called")
                     {
@@ -154,7 +128,7 @@ SCENARIO("Should Classify the data according to the Knn rule", "[Unit][strategy]
 
                         THEN("Resulting data is classified to group 2")
                         {
-                            classifier::strategy::Knn::Data dataPointCompare({0.0, 85.0, 85.0}, 30);
+                            classifier::strategy::Data dataPointCompare({0.0, 85.0, 85.0}, 30);
 
                             CHECK(dataPoint == dataPointCompare);
                         }

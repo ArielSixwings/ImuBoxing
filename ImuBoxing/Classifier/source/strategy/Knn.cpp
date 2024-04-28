@@ -7,39 +7,23 @@
 
 namespace classifier::strategy
 {
-    Knn::LabeledDistance Knn::Data::EuclideanDistance(const Data &other)
-    {
-        if (Features.size() != other.Features.size())
-        {
-            throw std::invalid_argument("Data Features must be of the same size.");
-        }
-
-        double sumSquaredDiff = 0.0;
-
-        for (size_t i = 0; i < Features.size(); i++)
-        {
-            sumSquaredDiff += std::pow(Features[i] - other.Features[i], 2);
-        }
-
-        return LabeledDistance(std::sqrt(sumSquaredDiff), other.Label);
-    }
 
     void Knn::AddData(const std::vector<Data> &data)
     {
         m_data.insert(m_data.end(), data.begin(), data.end());
     }
 
-    std::vector<Knn::Data> Knn::GetData()
+    std::vector<Data> Knn::GetData()
     {
         return m_data;
     }
 
-    std::vector<Knn::LabeledDistance> Knn::GetNeighbors()
+    std::vector<LabeledDistance> Knn::GetNeighbors()
     {
         return m_neighbors;
     }
 
-    Knn::Data Knn::Classify(Data &data)
+    Data Knn::Classify(Data &data)
     {
 
         std::ranges::transform(m_data,
@@ -86,25 +70,4 @@ namespace classifier::strategy
         return data;
     }
 
-}
-
-std::ostream &operator<<(std::ostream &os, const classifier::strategy::Knn::Data &data)
-{
-    os << "Features: [";
-    for (size_t i = 0; i < data.Features.size(); ++i)
-    {
-        os << data.Features[i];
-        if (i != data.Features.size() - 1)
-        {
-            os << ", ";
-        }
-    }
-    os << "], Label: " << static_cast<int>(data.Label);
-    return os;
-}
-
-std::ostream &operator<<(std::ostream &os, const classifier::strategy::Knn::LabeledDistance &other)
-{
-    os << "LabeledDistance { Distance: " << other.Distance << ", Label: " << static_cast<int>(other.Label) << " }";
-    return os;
 }

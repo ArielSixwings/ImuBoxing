@@ -2,6 +2,7 @@ include(AddCatch2)
 
 add_executable(
   ClassifierTest
+  DataDefinitionTest.cpp
   strategy/KnnTest.cpp
 )
 target_link_libraries(

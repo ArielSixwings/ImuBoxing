@@ -14,10 +14,12 @@ namespace mock
     {
     public:
         Publisher()
-            : Node("minimal_publisher")
+            : Node("minimalPublisher")
         {
 
-            m_publisher = create_publisher<geometry_msgs::msg::Vector3>("topic", 10);
+            RCLCPP_INFO(get_logger(), "Starting Publisher mock");
+
+            m_publisher = create_publisher<geometry_msgs::msg::Vector3>("mock/Angles", 10);
 
             m_timer = create_wall_timer(500ms, std::bind(&Publisher::timer_callback, this));
         }

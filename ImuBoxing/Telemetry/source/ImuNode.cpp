@@ -21,7 +21,7 @@ namespace telemetry
 
         m_serialPort->set_option(boost::asio::serial_port_base::baud_rate(115200));
 
-        m_publisher = create_publisher<geometry_msgs::msg::Vector3>("imu/angles", 1);
+        m_publisher = create_publisher<geometry_msgs::msg::Vector3>("imu/Angles", 1);
 
         m_startService = create_service<std_srvs::srv::Empty>(
             "imu/start", std::bind(&ImuNode::StartStreaming, this, std::placeholders::_1, std::placeholders::_2),

@@ -1,4 +1,5 @@
 #include "FeatureExtractor.h"
+#include "Utils.h"
 
 #include <memory>
 #include <fstream>
@@ -7,6 +8,7 @@ namespace classifier
 {
 
     FeatureExtractor::FeatureExtractor(const std::string &fileName,
+                                       const size_t numberOfEntries,
                                        const bool inTest) : Node("FeatureExtractor"),
                                                             m_fileName(fileName)
     {
@@ -18,11 +20,18 @@ namespace classifier
 
     void FeatureExtractor::topicCallback(const geometry_msgs::msg::Vector3::SharedPtr message)
     {
-        RCLCPP_INFO(get_logger(), "Received IMU angles: x: '%f', y: '%f', z: '%f'",
-                    message->x, message->y, message->z);
+        ++m_count;
+
+        auto percentage = static_cast<double>(m_count) / numberOfEntries .0;
+
+        Utils::PrintProgressBar(percentage);
+
+        if (m_count >= numberOfEntries)
+        {
+            rclcpp::shutdown();
+        }
 
         std::vector<double> angles = {message->x, message->y, message->z};
-
         SaveCsv(angles);
     }
 

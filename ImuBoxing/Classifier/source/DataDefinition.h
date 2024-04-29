@@ -4,7 +4,7 @@
 #include <cstdint>
 #include <iostream>
 
-namespace classifier::strategy
+namespace classifier
 {
 
     struct LabeledDistance
@@ -35,11 +35,12 @@ namespace classifier::strategy
                                     Label(label) {}
 
         bool operator==(const Data &other) const = default;
+
         LabeledDistance EuclideanDistance(const Data &other);
     };
 
 }
 
-std::ostream &operator<<(std::ostream &os, const classifier::strategy::Data &data);
+std::ostream &operator<<(std::ostream &os, const classifier::Data &data);
 
-std::ostream &operator<<(std::ostream &os, const classifier::strategy::LabeledDistance &other);
+std::ostream &operator<<(std::ostream &os, const classifier::LabeledDistance &other);

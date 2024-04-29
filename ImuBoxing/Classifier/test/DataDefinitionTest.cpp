@@ -7,15 +7,15 @@
 #include <catch2/catch_test_macros.hpp>
 
 SCENARIO("Should compute the euclidean distance between two Data",
-         "[Unit][strategy][Data][EuclideanDistance]")
+         "[Unit][Data][EuclideanDistance]")
 {
   GIVEN("a Data at 90.0, 0.0, 45.0")
   {
-    classifier::strategy::Data dataA({90.0, 0.0, 45.0}, 30);
+    classifier::Data dataA({90.0, 0.0, 45.0}, 30);
 
     AND_GIVEN("A Data at 0.0, 90.0, 90.0")
     {
-      classifier::strategy::Data dataB({0.0, 90.0, 90.0}, 8);
+      classifier::Data dataB({0.0, 90.0, 90.0}, 8);
 
       WHEN("EuclideanDistance is called")
       {
@@ -23,7 +23,7 @@ SCENARIO("Should compute the euclidean distance between two Data",
 
         THEN("Resulting LabeledDistance has expected value")
         {
-          classifier::strategy::LabeledDistance compare(135.0, 8);
+          classifier::LabeledDistance compare(135.0, 8);
 
           CHECK(result == compare);
         }

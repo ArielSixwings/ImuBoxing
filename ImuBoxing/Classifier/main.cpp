@@ -11,7 +11,7 @@ int main(int argc, char *argv[])
     // const std::string fileName = path + "jabEnd.csv";
     // const std::string fileName = path + "hookEnd.csv";
     // const std::string fileName = path + "uppercutEnd.csv";
-    rclcpp::spin(std::make_shared<classifier::FeatureExtractor>(fileName, true));
+    rclcpp::spin(std::make_shared<classifier::FeatureExtractor>(fileName, 2048, true));
     rclcpp::shutdown();
 
     return 0;

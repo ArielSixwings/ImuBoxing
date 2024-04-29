@@ -11,6 +11,7 @@ namespace classifier
     {
     public:
         FeatureExtractor(const std::string &fileName,
+                         const size_t numberOfEntries,
                          const bool inTest = false);
 
         void SaveCsv(const std::vector<double> &features);

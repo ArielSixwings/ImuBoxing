@@ -35,12 +35,12 @@ SCENARIO("Should add data to a Knn Object", "[Unit][strategy][Knn][AddData][GetD
                 features.push_back(group);
             }
 
-            std::vector<classifier::strategy::Data> group;
+            std::vector<classifier::Data> group;
 
             std::ranges::transform(features,
                                    std::back_inserter(group),
                                    [](const auto &feature)
-                                   { return classifier::strategy::Data(feature, 0); });
+                                   { return classifier::Data(feature, 0); });
 
             WHEN("AddData is called")
             {
@@ -79,12 +79,12 @@ SCENARIO("Should Classify the data according to the Knn rule", "[Unit][strategy]
             features1.push_back(point);
         }
 
-        std::vector<classifier::strategy::Data> group;
+        std::vector<classifier::Data> group;
 
         std::ranges::transform(features1,
                                std::back_inserter(group),
                                [](const auto &feature)
-                               { return classifier::strategy::Data(feature, 5); });
+                               { return classifier::Data(feature, 5); });
 
         AND_GIVEN("a vector of Data centered at 0.0, 90.0, 90.0")
         {
@@ -110,7 +110,7 @@ SCENARIO("Should Classify the data according to the Knn rule", "[Unit][strategy]
             std::ranges::transform(features2,
                                    std::back_inserter(group),
                                    [](const auto &feature)
-                                   { return classifier::strategy::Data(feature, 30); });
+                                   { return classifier::Data(feature, 30); });
 
             AND_GIVEN("a knn Object")
             {
@@ -120,7 +120,7 @@ SCENARIO("Should Classify the data according to the Knn rule", "[Unit][strategy]
 
                 AND_GIVEN("A Data at 0.0, 85.0, 85.0")
                 {
-                    classifier::strategy::Data dataPoint({0.0, 85.0, 85.0}, 100);
+                    classifier::Data dataPoint({0.0, 85.0, 85.0}, 100);
 
                     WHEN("Classify is called")
                     {
@@ -128,7 +128,7 @@ SCENARIO("Should Classify the data according to the Knn rule", "[Unit][strategy]
 
                         THEN("Resulting data is classified to group 2")
                         {
-                            classifier::strategy::Data dataPointCompare({0.0, 85.0, 85.0}, 30);
+                            classifier::Data dataPointCompare({0.0, 85.0, 85.0}, 30);
 
                             CHECK(dataPoint == dataPointCompare);
                         }

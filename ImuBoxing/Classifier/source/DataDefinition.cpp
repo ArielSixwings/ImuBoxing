@@ -1,9 +1,10 @@
 #include "DataDefinition.h"
 
+#include <numeric>
 #include <cmath>
 #include <iostream>
 
-namespace classifier::strategy
+namespace classifier
 {
 
     LabeledDistance Data::EuclideanDistance(const Data &other)
@@ -24,7 +25,7 @@ namespace classifier::strategy
     }
 }
 
-std::ostream &operator<<(std::ostream &os, const classifier::strategy::Data &data)
+std::ostream &operator<<(std::ostream &os, const classifier::Data &data)
 {
     os << "Features: [";
     for (size_t i = 0; i < data.Features.size(); ++i)
@@ -39,7 +40,7 @@ std::ostream &operator<<(std::ostream &os, const classifier::strategy::Data &dat
     return os;
 }
 
-std::ostream &operator<<(std::ostream &os, const classifier::strategy::LabeledDistance &other)
+std::ostream &operator<<(std::ostream &os, const classifier::LabeledDistance &other)
 {
     os << "LabeledDistance { Distance: " << other.Distance << ", Label: " << static_cast<int>(other.Label) << " }";
     return os;

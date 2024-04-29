@@ -22,6 +22,7 @@ namespace classifier
         rclcpp::Subscription<geometry_msgs::msg::Vector3>::SharedPtr m_subscription;
 
         size_t m_count = 0;
+        size_t m_numberOfEntries;
         std::string m_fileName;
     };
 }

@@ -10,6 +10,7 @@ namespace classifier
     FeatureExtractor::FeatureExtractor(const std::string &fileName,
                                        const size_t numberOfEntries,
                                        const bool inTest) : Node("FeatureExtractor"),
+                                                            m_numberOfEntries(numberOfEntries),
                                                             m_fileName(fileName)
     {
         const auto topic = inTest ? "mock/Angles" : "imu/Angles";
@@ -22,11 +23,11 @@ namespace classifier
     {
         ++m_count;
 
-        auto percentage = static_cast<double>(m_count) / numberOfEntries .0;
+        auto percentage = static_cast<double>(m_count) / static_cast<double>(m_numberOfEntries);
 
         Utils::PrintProgressBar(percentage);
 
-        if (m_count >= numberOfEntries)
+        if (m_count >= m_numberOfEntries)
         {
             rclcpp::shutdown();
         }
@@ -61,7 +62,7 @@ namespace classifier
 
         csvFile << csvData;
 
-        RCLCPP_INFO(get_logger(), "Features saved to %s", m_fileName.c_str());
+        // RCLCPP_INFO(get_logger(), "Features saved to %s", m_fileName.c_str());
     }
 
 };

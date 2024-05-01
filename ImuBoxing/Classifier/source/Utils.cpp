@@ -13,8 +13,7 @@
 
 namespace classifier
 {
-
-    std::optional<Data> Utils::Mean(const std::vector<Data> &data)
+    std::optional<classes::Data> Utils::Mean(const std::vector<classes::Data> &data)
     {
         if (data.empty())
         {
@@ -38,7 +37,7 @@ namespace classifier
             return {};
         }
 
-        Data sumOfData(std::vector<double>(numFeatures, 0.0), label);
+        classes::Data sumOfData(std::vector<double>(numFeatures, 0.0), label);
 
         std::ranges::for_each(data, [&sumOfData](const auto point)
                               { sumOfData = sumOfData + point; });
@@ -67,10 +66,10 @@ namespace classifier
         std::cout.flush(); // Important to use when updating the same line
     }
 
-    std::vector<Data> Utils::ReadCSV(const std::string &filename, const int label)
+    std::vector<classes::Data> Utils::ReadCSV(const std::string &filename, const int label)
     {
         std::ifstream file(filename);
-        std::vector<Data> data;
+        std::vector<classes::Data> data;
 
         if (not file.is_open())
         {
@@ -108,7 +107,7 @@ namespace classifier
                 continue;
             }
 
-            Data feature(row, label);
+            classes::Data feature(row, label);
 
             data.push_back(feature);
         }

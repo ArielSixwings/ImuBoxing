@@ -1,4 +1,4 @@
-#include "DataDefinition.h"
+#include "Data.h"
 
 #include <algorithm>
 #include <iterator>
@@ -7,7 +7,7 @@
 #include <numeric>
 #include <ranges>
 
-namespace classifier
+namespace classifier::classes
 {
 
     LabeledDistance Data::EuclideanDistance(const Data &other)
@@ -53,7 +53,7 @@ namespace classifier
     }
 }
 
-std::ostream &operator<<(std::ostream &os, const classifier::Data &data)
+std::ostream &operator<<(std::ostream &os, const classifier::classes::Data &data)
 {
     os << "Features: [";
     for (size_t i = 0; i < data.Features.size(); ++i)
@@ -65,11 +65,5 @@ std::ostream &operator<<(std::ostream &os, const classifier::Data &data)
         }
     }
     os << "], Label: " << static_cast<int>(data.Label);
-    return os;
-}
-
-std::ostream &operator<<(std::ostream &os, const classifier::LabeledDistance &other)
-{
-    os << "LabeledDistance { Distance: " << other.Distance << ", Label: " << static_cast<int>(other.Label) << " }";
     return os;
 }

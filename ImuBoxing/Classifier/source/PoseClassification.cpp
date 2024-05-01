@@ -22,10 +22,10 @@ namespace classifier
         // const std::string fileName = path + "hookEnd.csv";
         // const std::string fileName = path + "uppercutEnd.csv";
 
-        const auto guardData = Utils::ReadCSV(path + "guard.csv", classifier::Data::Poses::Guard);
-        const auto jabEndData = Utils::ReadCSV(path + "jabEnd.csv", classifier::Data::Poses::JabEnd);
-        const auto hookEndData = Utils::ReadCSV(path + "hookEnd.csv", classifier::Data::Poses::HookEnd);
-        const auto uppercutEndData = Utils::ReadCSV(path + "uppercutEnd.csv", classifier::Data::Poses::UppercutEnd);
+        const auto guardData = Utils::ReadCSV(path + "guard.csv", classifier::classes::Data::Poses::Guard);
+        const auto jabEndData = Utils::ReadCSV(path + "jabEnd.csv", classifier::classes::Data::Poses::JabEnd);
+        const auto hookEndData = Utils::ReadCSV(path + "hookEnd.csv", classifier::classes::Data::Poses::HookEnd);
+        const auto uppercutEndData = Utils::ReadCSV(path + "uppercutEnd.csv", classifier::classes::Data::Poses::UppercutEnd);
 
         m_knn.AddData(guardData);
         m_knn.AddData(jabEndData);
@@ -38,54 +38,54 @@ namespace classifier
 
         std::vector<double> angles = {message->x, message->y, message->z};
 
-        Data dataPoint(angles, classifier::Data::Poses::Unknown);
+        classes::Data dataPoint(angles, classifier::classes::Data::Poses::Unknown);
 
         const auto result = m_knn.Classify(dataPoint);
 
         switch (result.Label)
         {
-        case classifier::Data::Poses::Guard:
+        case classifier::classes::Data::Poses::Guard:
 
-            if (m_lastPose != classifier::Data::Poses::Guard)
+            if (m_lastPose != classifier::classes::Data::Poses::Guard)
             {
 
                 RCLCPP_INFO(get_logger(), "GUARD");
             }
 
-            m_lastPose = classifier::Data::Poses::Guard;
+            m_lastPose = classifier::classes::Data::Poses::Guard;
             break;
 
-        case classifier::Data::Poses::JabEnd:
+        case classifier::classes::Data::Poses::JabEnd:
 
-            if (m_lastPose != classifier::Data::Poses::JabEnd)
+            if (m_lastPose != classifier::classes::Data::Poses::JabEnd)
             {
 
                 RCLCPP_INFO(get_logger(), "JAB END");
             }
 
-            m_lastPose = classifier::Data::Poses::JabEnd;
+            m_lastPose = classifier::classes::Data::Poses::JabEnd;
             break;
 
-        case classifier::Data::Poses::HookEnd:
+        case classifier::classes::Data::Poses::HookEnd:
 
-            if (m_lastPose != classifier::Data::Poses::HookEnd)
+            if (m_lastPose != classifier::classes::Data::Poses::HookEnd)
             {
 
                 RCLCPP_INFO(get_logger(), "HOOK END");
             }
 
-            m_lastPose = classifier::Data::Poses::HookEnd;
+            m_lastPose = classifier::classes::Data::Poses::HookEnd;
             break;
 
-        case classifier::Data::Poses::UppercutEnd:
+        case classifier::classes::Data::Poses::UppercutEnd:
 
-            if (m_lastPose != classifier::Data::Poses::UppercutEnd)
+            if (m_lastPose != classifier::classes::Data::Poses::UppercutEnd)
             {
 
                 RCLCPP_INFO(get_logger(), "UPPERCUT END");
             }
 
-            m_lastPose = classifier::Data::Poses::UppercutEnd;
+            m_lastPose = classifier::classes::Data::Poses::UppercutEnd;
             break;
 
         default:

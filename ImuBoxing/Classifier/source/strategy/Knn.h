@@ -1,6 +1,7 @@
 #pragma once
 
-#include "../DataDefinition.h"
+#include "classes/Data.h"
+#include "classes/LabeledDistance.h"
 
 #include <vector>
 #include <cstdint>
@@ -14,18 +15,18 @@ namespace classifier::strategy
         Knn() : m_k(3) {}
         Knn(const uint8_t k) : m_k(k) {}
 
-        void AddData(const std::vector<Data> &data);
+        void AddData(const std::vector<classes::Data> &data);
 
-        std::vector<Data> GetData();
-        std::vector<LabeledDistance> GetNeighbors();
+        std::vector<classes::Data> GetData();
+        std::vector<classes::LabeledDistance> GetNeighbors();
 
-        Data Classify(Data &data);
+        classes::Data Classify(classes::Data &data);
 
     private:
         uint8_t m_k;
 
-        std::vector<LabeledDistance> m_neighbors;
-        std::vector<Data> m_data;
+        std::vector<classes::LabeledDistance> m_neighbors;
+        std::vector<classes::Data> m_data;
     };
 
 }

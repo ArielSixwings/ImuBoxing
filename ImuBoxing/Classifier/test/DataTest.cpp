@@ -1,4 +1,5 @@
-#include "DataDefinition.h"
+#include "classes/Data.h"
+#include "classes/LabeledDistance.h"
 
 #include <algorithm>
 #include <random>
@@ -11,11 +12,11 @@ SCENARIO("Should compute the euclidean distance between two Data",
 {
   GIVEN("a Data at 90.0, 0.0, 45.0")
   {
-    classifier::Data dataA({90.0, 0.0, 45.0}, 30);
+    classifier::classes::Data dataA({90.0, 0.0, 45.0}, 30);
 
     AND_GIVEN("A Data at 0.0, 90.0, 90.0")
     {
-      classifier::Data dataB({0.0, 90.0, 90.0}, 8);
+      classifier::classes::Data dataB({0.0, 90.0, 90.0}, 8);
 
       WHEN("EuclideanDistance is called")
       {
@@ -23,7 +24,7 @@ SCENARIO("Should compute the euclidean distance between two Data",
 
         THEN("Resulting LabeledDistance has expected value")
         {
-          classifier::LabeledDistance compare(135.0, 8);
+          classifier::classes::LabeledDistance compare(135.0, 8);
 
           CHECK(result == compare);
         }

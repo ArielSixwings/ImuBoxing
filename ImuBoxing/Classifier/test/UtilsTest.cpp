@@ -1,5 +1,5 @@
 #include "Utils.h"
-#include "DataDefinition.h"
+#include "classes/Data.h"
 
 #include <algorithm>
 #include <ranges>
@@ -24,12 +24,12 @@ SCENARIO("Should calculate the mean point  of a Data vector", "[Unit][Utils][Mea
             features.push_back(group);
         }
 
-        std::vector<classifier::Data> group;
+        std::vector<classifier::classes::Data> group;
 
         std::ranges::transform(features,
                                std::back_inserter(group),
                                [](const auto &feature)
-                               { return classifier::Data(feature, 6); });
+                               { return classifier::classes::Data(feature, 6); });
 
         WHEN("Mean is called")
         {
@@ -42,7 +42,7 @@ SCENARIO("Should calculate the mean point  of a Data vector", "[Unit][Utils][Mea
 
                 AND_THEN("Mean result has expected value")
                 {
-                    const classifier::Data compare({94.5, 4.5, 49.5}, 6);
+                    const classifier::classes::Data compare({94.5, 4.5, 49.5}, 6);
 
                     CHECK(result.value() == compare);
                 }
@@ -56,8 +56,8 @@ SCENARIO("Should operate with Data", "[Unit][Utils][operators]")
 
     GIVEN("Two Data")
     {
-        classifier::Data valueA({10.1, 10.1, 10.1}, 2);
-        classifier::Data valueB({5.0, 10.0, 1.0}, 3);
+        classifier::classes::Data valueA({10.1, 10.1, 10.1}, 2);
+        classifier::classes::Data valueB({5.0, 10.0, 1.0}, 3);
 
         WHEN("operator+ is called")
         {
@@ -65,7 +65,7 @@ SCENARIO("Should operate with Data", "[Unit][Utils][operators]")
 
             THEN("Result has sum of Features")
             {
-                const classifier::Data compare({15.1, 20.1, 11.1}, 2);
+                const classifier::classes::Data compare({15.1, 20.1, 11.1}, 2);
 
                 CHECK(result == compare);
             }
@@ -74,7 +74,7 @@ SCENARIO("Should operate with Data", "[Unit][Utils][operators]")
 
     GIVEN("A Data")
     {
-        classifier::Data valueA({10.1, 10.1, 10.1}, 2);
+        classifier::classes::Data valueA({10.1, 10.1, 10.1}, 2);
 
         WHEN("operator/ is called")
         {
@@ -82,7 +82,7 @@ SCENARIO("Should operate with Data", "[Unit][Utils][operators]")
 
             THEN("Result has Features that were divided by the value")
             {
-                const classifier::Data compare({5.05, 5.05, 5.05}, 2);
+                const classifier::classes::Data compare({5.05, 5.05, 5.05}, 2);
 
                 CHECK(result == compare);
             }

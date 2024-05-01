@@ -1,4 +1,4 @@
-#include "Telemetry/source/ImuNode.h"
+#include "source/ImuNode.h"
 
 #include <thread>
 

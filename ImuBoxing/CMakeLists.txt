@@ -12,13 +12,17 @@ enable_testing()
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 
-# find dependencies
+
 find_package(ament_cmake REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(std_srvs REQUIRED)
 find_package(Boost REQUIRED COMPONENTS system thread)
 
 add_subdirectory(Telemetry)
+add_subdirectory(Classifier)
 
-add_executable(boxingModule main.cpp)
-target_link_libraries(boxingModule Boost::system Boost::thread telemetrySource)
+add_executable(telemetry Telemetry/main.cpp)
+target_link_libraries(telemetry Boost::system Boost::thread telemetrySource)
+
+add_executable(classifier Classifier/main.cpp)
+target_link_libraries(classifier Boost::system Boost::thread classifierSource)

@@ -2,12 +2,14 @@
 
 #include "rclcpp/rclcpp.hpp"
 
+#include <algorithm>
 #include <fstream>
+#include <iomanip>
 #include <iostream>
+#include <iterator>
+#include <ranges>
 #include <sstream>
 #include <vector>
-#include <algorithm>
-#include <iomanip>
 
 namespace classifier
 {
@@ -36,22 +38,14 @@ namespace classifier
             return {};
         }
 
-        std::vector<double> means(numFeatures, 0.0);
+        Data sumOfData(std::vector<double>(numFeatures, 0.0), label);
 
-        for (const auto &point : data)
-        {
-            for (size_t i = 0; i < numFeatures; ++i)
-            {
-                means[i] += point.Features[i];
-            }
-        }
+        std::ranges::for_each(data, [&sumOfData](const auto point)
+                              { sumOfData = sumOfData + point; });
 
-        for (size_t i = 0; i < numFeatures; ++i)
-        {
-            means[i] /= data.size();
-        }
+        const auto mean = sumOfData / static_cast<double>(data.size());
 
-        return Data(means, label);
+        return mean;
     }
 
     void Utils::PrintProgressBar(double percentage)
@@ -81,7 +75,7 @@ namespace classifier
         if (not file.is_open())
         {
             std::cerr << "Error: Could not open file: " << filename << std::endl;
-            return data; // Return empty data vector if file cannot be opened
+            return data;
         }
 
         std::string line;
@@ -94,22 +88,20 @@ namespace classifier
             std::vector<double> row;
             double value;
 
-            size_t count = 0; // Counter for the number of values read
+            size_t count = 0;
 
-            // Read comma-separated values and convert to doubles
             while (lineStream >> value)
             {
                 row.push_back(value);
                 count++;
 
-                if (count == 3) // Ensure we only read three values per row
+                if (count == 3)
                     break;
 
-                if (lineStream.peek() == ',') // Skip the comma
+                if (lineStream.peek() == ',')
                     lineStream.ignore();
             }
 
-            // If the row doesn't contain exactly three values, skip it
             if (count != 3)
             {
                 std::cerr << "Warning: Row does not contain exactly three values. Skipping..." << std::endl;
@@ -118,7 +110,6 @@ namespace classifier
 
             Data feature(row, label);
 
-            // Add the row of doubles to the data vector
             data.push_back(feature);
         }
 

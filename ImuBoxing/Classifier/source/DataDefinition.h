@@ -39,11 +39,16 @@ namespace classifier
         std::vector<double> Features;
         uint8_t Label;
 
+        Data() : Features({}), Label(0) {}
+
         Data(const std::vector<double> &features,
              const uint8_t label) : Features(features),
                                     Label(label) {}
 
         bool operator==(const Data &other) const = default;
+
+        Data operator+(const Data &other) const;
+        Data operator/(double divisor) const;
 
         LabeledDistance EuclideanDistance(const Data &other);
     };

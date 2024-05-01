@@ -1,8 +1,11 @@
 #include "DataDefinition.h"
 
-#include <numeric>
+#include <algorithm>
+#include <iterator>
 #include <cmath>
 #include <iostream>
+#include <numeric>
+#include <ranges>
 
 namespace classifier
 {
@@ -22,6 +25,31 @@ namespace classifier
         }
 
         return LabeledDistance(std::sqrt(sumSquaredDiff), other.Label);
+    }
+
+    Data Data::operator+(const Data &other) const
+    {
+        Data result;
+
+        result.Label = Label;
+        std::transform(Features.begin(), Features.end(), other.Features.begin(),
+                       std::back_inserter(result.Features), std::plus<double>());
+        return result;
+    }
+
+    Data Data::operator/(double divisor) const
+    {
+        if (divisor == 0)
+        {
+
+            throw std::invalid_argument("Division by zero");
+        }
+        Data result;
+        result.Label = Label;
+        std::ranges::transform(Features, std::back_inserter(result.Features),
+                               [divisor](double feature)
+                               { return feature / divisor; });
+        return result;
     }
 }
 

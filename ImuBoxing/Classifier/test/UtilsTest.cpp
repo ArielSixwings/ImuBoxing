@@ -2,7 +2,6 @@
 #include "DataDefinition.h"
 
 #include <algorithm>
-#include <random>
 #include <ranges>
 
 #include <catch2/catch_test_macros.hpp>
@@ -19,14 +18,8 @@ SCENARIO("Should calculate the mean point  of a Data vector", "[Unit][Utils][Mea
 
             std::vector<double> group = {90.0, 0.0, 45.0};
 
-            std::random_device randomDevice;
-            std::mt19937 generator(randomDevice());
-            std::uniform_real_distribution<double> distribution(-5.0, 5.0);
-
-            double randomValue = distribution(generator);
-
-            std::ranges::for_each(group, [&randomValue](auto &entry)
-                                  { entry += randomValue; });
+            std::ranges::for_each(group, [&i](auto &entry)
+                                  { entry += i; });
 
             features.push_back(group);
         }
@@ -49,10 +42,49 @@ SCENARIO("Should calculate the mean point  of a Data vector", "[Unit][Utils][Mea
 
                 AND_THEN("Mean result has expected value")
                 {
-                    const classifier::Data compare({0.0, 0.0, 0.0}, 6);
+                    const classifier::Data compare({94.5, 4.5, 49.5}, 6);
 
                     CHECK(result.value() == compare);
                 }
+            }
+        }
+    }
+}
+
+SCENARIO("Should operate with Data", "[Unit][Utils][operators]")
+{
+
+    GIVEN("Two Data")
+    {
+        classifier::Data valueA({10.1, 10.1, 10.1}, 2);
+        classifier::Data valueB({5.0, 10.0, 1.0}, 3);
+
+        WHEN("operator+ is called")
+        {
+            const auto result = valueA + valueB;
+
+            THEN("Result has sum of Features")
+            {
+                const classifier::Data compare({15.1, 20.1, 11.1}, 2);
+
+                CHECK(result == compare);
+            }
+        }
+    }
+
+    GIVEN("A Data")
+    {
+        classifier::Data valueA({10.1, 10.1, 10.1}, 2);
+
+        WHEN("operator/ is called")
+        {
+            const auto result = valueA / 2.0;
+
+            THEN("Result has Features that were divided by the value")
+            {
+                const classifier::Data compare({5.05, 5.05, 5.05}, 2);
+
+                CHECK(result == compare);
             }
         }
     }

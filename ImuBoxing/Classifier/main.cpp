@@ -1,17 +1,13 @@
-#include "source/FeatureExtractor.h"
+#include "source/PoseClassification.h"
 
 int main(int argc, char *argv[])
 {
-    const std::string path = "ImuBoxing/data/";
-
     rclcpp::init(argc, argv);
-
     // const std::string fileName = path + "dataTest.csv";
     // const std::string fileName = path + "guard.csv";
     // const std::string fileName = path + "jabEnd.csv";
     // const std::string fileName = path + "hookEnd.csv";
-    const std::string fileName = path + "uppercutEnd.csv";
-    rclcpp::spin(std::make_shared<classifier::FeatureExtractor>(fileName, 2048, false));
+    rclcpp::spin(std::make_shared<classifier::PoseClassification>());
     rclcpp::shutdown();
 
     return 0;

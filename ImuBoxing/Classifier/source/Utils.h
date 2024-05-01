@@ -15,6 +15,9 @@ namespace classifier
         static std::optional<Data> Mean(const std::vector<Data> &data);
 
         static void PrintProgressBar(double percentage);
+
+        static std::vector<Data> ReadCSV(const std::string &filename,
+                                         const int label);
     };
 
 }

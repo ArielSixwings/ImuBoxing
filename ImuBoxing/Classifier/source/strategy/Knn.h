@@ -1,6 +1,6 @@
 #pragma once
 
-#include "DataDefinition.h"
+#include "../DataDefinition.h"
 
 #include <vector>
 #include <cstdint>
@@ -11,6 +11,7 @@ namespace classifier::strategy
     class Knn
     {
     public:
+        Knn() : m_k(3) {}
         Knn(const uint8_t k) : m_k(k) {}
 
         void AddData(const std::vector<Data> &data);

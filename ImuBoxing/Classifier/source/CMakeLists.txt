@@ -2,6 +2,7 @@ find_package(rclcpp REQUIRED)
 
 add_library(classifierSource 
             classes/Data.cpp
+            classes/Group.cpp
             classes/LabeledDistance.cpp
             FeatureExtractor.cpp 
             PoseClassification.cpp

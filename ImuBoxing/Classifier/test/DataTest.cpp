@@ -32,3 +32,42 @@ SCENARIO("Should compute the euclidean distance between two Data",
     }
   }
 }
+
+SCENARIO("Should operate with Data", "[Unit][Utils][operators]")
+{
+
+  GIVEN("Two Data")
+  {
+    classifier::classes::Data valueA({10.1, 10.1, 10.1}, 2);
+    classifier::classes::Data valueB({5.0, 10.0, 1.0}, 3);
+
+    WHEN("operator+ is called")
+    {
+      const auto result = valueA + valueB;
+
+      THEN("Result has sum of Features")
+      {
+        const classifier::classes::Data compare({15.1, 20.1, 11.1}, 2);
+
+        CHECK(result == compare);
+      }
+    }
+  }
+
+  GIVEN("A Data")
+  {
+    classifier::classes::Data valueA({10.1, 10.1, 10.1}, 2);
+
+    WHEN("operator/ is called")
+    {
+      const auto result = valueA / 2.0;
+
+      THEN("Result has Features that were divided by the value")
+      {
+        const classifier::classes::Data compare({5.05, 5.05, 5.05}, 2);
+
+        CHECK(result == compare);
+      }
+    }
+  }
+}

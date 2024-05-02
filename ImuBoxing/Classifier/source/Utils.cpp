@@ -13,39 +13,6 @@
 
 namespace classifier
 {
-    std::optional<classes::Data> Utils::Mean(const std::vector<classes::Data> &data)
-    {
-        if (data.empty())
-        {
-            return {};
-        }
-
-        const auto numFeatures = data[0].Features.size();
-
-        auto valid = true;
-
-        std::ranges::for_each(data, [&numFeatures, &valid](const auto point)
-                              { if(point.Features.size() != numFeatures) valid = false; });
-
-        const auto label = data[0].Label;
-
-        std::ranges::for_each(data, [&label, &valid](const auto point)
-                              { if(point.Label != label) valid = false; });
-
-        if (not valid)
-        {
-            return {};
-        }
-
-        classes::Data sumOfData(std::vector<double>(numFeatures, 0.0), label);
-
-        std::ranges::for_each(data, [&sumOfData](const auto point)
-                              { sumOfData = sumOfData + point; });
-
-        const auto mean = sumOfData / static_cast<double>(data.size());
-
-        return mean;
-    }
 
     void Utils::PrintProgressBar(double percentage)
     {

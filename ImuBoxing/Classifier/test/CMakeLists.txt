@@ -2,7 +2,7 @@ include(AddCatch2)
 
 add_executable(
   ClassifierTest
-  UtilsTest.cpp
+  GroupTest.cpp
   DataTest.cpp
   strategy/KnnTest.cpp
 )

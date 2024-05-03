@@ -13,14 +13,7 @@ namespace classifier
         m_subscription = create_subscription<geometry_msgs::msg::Vector3>(
             "imu/Angles", 10, std::bind(&PoseClassification::topicCallback, this, std::placeholders::_1));
 
-        // m_knn(5);
-
         const std::string path = "ImuBoxing/data/";
-
-        // const std::string fileName = path + "guard.csv";
-        // const std::string fileName = path + "jabEnd.csv";
-        // const std::string fileName = path + "hookEnd.csv";
-        // const std::string fileName = path + "uppercutEnd.csv";
 
         const auto guardData = Utils::ReadCSV(path + "guard.csv", classifier::classes::Data::Poses::Guard);
         const auto jabEndData = Utils::ReadCSV(path + "jabEnd.csv", classifier::classes::Data::Poses::JabEnd);
@@ -31,6 +24,11 @@ namespace classifier
         m_knn.AddData(jabEndData);
         m_knn.AddData(hookEndData);
         m_knn.AddData(uppercutEndData);
+
+        m_kMeans.AddGroup(guardData);
+        m_kMeans.AddGroup(jabEndData);
+        m_kMeans.AddGroup(hookEndData);
+        m_kMeans.AddGroup(uppercutEndData);
     }
 
     void PoseClassification::topicCallback(const geometry_msgs::msg::Vector3::SharedPtr message)
@@ -40,7 +38,8 @@ namespace classifier
 
         classes::Data dataPoint(angles, classifier::classes::Data::Poses::Unknown);
 
-        const auto result = m_knn.Classify(dataPoint);
+        // const auto result = m_knn.Classify(dataPoint);
+        const auto result = m_kMeans.Classify(dataPoint);
 
         switch (result.Label)
         {

@@ -7,7 +7,7 @@
 
 namespace classifier::classes
 {
-    Group::Group(std::vector<Data> &points) : m_points(points)
+    Group::Group(const std::vector<Data> &points) : m_points(points)
     {
         m_mean = Mean();
         m_standardDeviation = StandardDeviation();

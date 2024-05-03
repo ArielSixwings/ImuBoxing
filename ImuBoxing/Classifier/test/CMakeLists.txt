@@ -4,6 +4,7 @@ add_executable(
   ClassifierTest
   GroupTest.cpp
   DataTest.cpp
+  strategy/KMeansTest.cpp
   strategy/KnnTest.cpp
 )
 target_link_libraries(

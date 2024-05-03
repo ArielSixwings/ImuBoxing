@@ -8,7 +8,7 @@ namespace classifier::classes
     class Group
     {
     public:
-        Group(std::vector<Data> &points);
+        Group(const std::vector<Data> &points);
 
         std::optional<Data> Mean();
         std::optional<double> StandardDeviation();

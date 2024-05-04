@@ -8,42 +8,39 @@
 namespace classifier::strategy
 {
 
-    void Knn::AddData(const std::vector<Data> &data)
+    void Knn::AddData(const std::vector<classes::Data> &data)
     {
         m_data.insert(m_data.end(), data.begin(), data.end());
     }
 
-    std::vector<Data> Knn::GetData()
+    std::vector<classes::Data> Knn::GetData()
     {
         return m_data;
     }
 
-    std::vector<LabeledDistance> Knn::GetNeighbors()
+    classes::Data Knn::Classify(classes::Data &data)
     {
-        return m_neighbors;
-    }
 
-    Data Knn::Classify(Data &data)
-    {
+        std::vector<classes::LabeledDistance> neighbors;
 
         std::ranges::transform(m_data,
-                               std::back_inserter(m_neighbors),
+                               std::back_inserter(neighbors),
                                [&data](const auto &dataPoint)
                                { return data.EuclideanDistance(dataPoint); });
 
-        std::ranges::sort(m_neighbors, [](const LabeledDistance &a, const LabeledDistance &b)
+        std::ranges::sort(neighbors, [](const classes::LabeledDistance &a, const classes::LabeledDistance &b)
                           { return a.Distance < b.Distance; });
 
-        std::vector<LabeledDistance> candidates;
+        std::vector<classes::LabeledDistance> candidates;
 
         candidates.insert(candidates.begin(),
-                          m_neighbors.begin(),
-                          std::next(m_neighbors.begin(), std::min(m_neighbors.size(), static_cast<size_t>(m_k))));
+                          neighbors.begin(),
+                          std::next(neighbors.begin(), std::min(neighbors.size(), static_cast<size_t>(m_k))));
 
         std::vector<uint8_t> labels(m_k);
 
         std::ranges::transform(candidates, labels.begin(),
-                               [](const LabeledDistance &neighbor)
+                               [](const classes::LabeledDistance &neighbor)
                                { return neighbor.Label; });
 
         std::unordered_map<uint8_t, size_t> labelCounts;

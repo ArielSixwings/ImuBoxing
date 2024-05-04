@@ -1,5 +1,6 @@
 #pragma once
 
+#include "classes/Group.h"
 #include "classes/Data.h"
 #include "classes/LabeledDistance.h"
 
@@ -9,22 +10,18 @@
 
 namespace classifier::strategy
 {
-    class Knn
+    class KMeans
     {
     public:
-        Knn() : m_k(3) {}
-        Knn(const uint8_t k) : m_k(k) {}
+        KMeans() {}
 
-        void AddData(const std::vector<classes::Data> &data);
-
-        std::vector<classes::Data> GetData();
+        void AddGroup(const classes::Group &group);
+        void AddGroup(const std::vector<classes::Data> &points);
 
         classes::Data Classify(classes::Data &data);
 
     private:
-        uint8_t m_k;
-
-        std::vector<classes::Data> m_data;
+        std::vector<classes::Group> m_groups;
     };
 
 }

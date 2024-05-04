@@ -51,7 +51,7 @@ namespace telemetry
                            SpaceSensor::StreamingCommand::NoCommand,
                            SpaceSensor::StreamingCommand::NoCommand});
 
-        SetStreamingTiming(100);
+        SetStreamingTiming(5);
 
         SetCompassEnabledToZero();
         SetEulerAngleDecompositionOrder();

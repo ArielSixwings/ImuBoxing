@@ -1,11 +1,14 @@
 find_package(rclcpp REQUIRED)
 
 add_library(classifierSource 
-            strategy/Knn.cpp 
-            Utils.cpp 
-            DataDefinition.cpp
+            classes/Data.cpp
+            classes/Group.cpp
+            classes/LabeledDistance.cpp
+            FeatureExtractor.cpp 
             PoseClassification.cpp
-            FeatureExtractor.cpp )
+            strategy/KMeans.cpp 
+            strategy/Knn.cpp 
+            Utils.cpp )
             
 target_include_directories(classifierSource PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 

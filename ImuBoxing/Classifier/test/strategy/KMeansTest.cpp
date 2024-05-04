@@ -1,5 +1,6 @@
 #include "strategy/KMeans.h"
 #include "classes/Data.h"
+#include "Utils.h"
 
 #include <algorithm>
 #include <random>
@@ -93,3 +94,27 @@ SCENARIO("Should Classify the data according to the KMeans rule", "[Unit][strate
         }
     }
 }
+
+// SCENARIO("Should use groups with distances bigger than the standard deviation", "")
+// {
+
+//     GIVEN("The current 4 groups")
+//     {
+//         const std::string path = "ImuBoxing/data/";
+
+//         const auto guardData = Utils::ReadCSV(path + "guard.csv", classifier::classes::Data::Poses::Guard);
+//         const auto jabEndData = Utils::ReadCSV(path + "jabEnd.csv", classifier::classes::Data::Poses::JabEnd);
+//         const auto hookEndData = Utils::ReadCSV(path + "hookEnd.csv", classifier::classes::Data::Poses::HookEnd);
+//         const auto uppercutEndData = Utils::ReadCSV(path + "uppercutEnd.csv", classifier::classes::Data::Poses::UppercutEnd);
+
+//         classifier::strategy::KMeans KMeans;
+//         KMeans.AddGroup(guardData);
+//         KMeans.AddGroup(jabEndData);
+//         KMeans.AddGroup(hookEndData);
+//         KMeans.AddGroup(uppercutEndData);
+
+//         WHEN("Separation status is called")
+//         {
+//         }
+//     }
+// }

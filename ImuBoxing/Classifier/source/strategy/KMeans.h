@@ -22,7 +22,6 @@ namespace classifier::strategy
 
     private:
         std::vector<classes::Group> m_groups;
-        std::vector<classes::LabeledDistance> m_meanDistances;
     };
 
 }

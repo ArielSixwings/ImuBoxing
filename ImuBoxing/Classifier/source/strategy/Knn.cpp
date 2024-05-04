@@ -18,27 +18,24 @@ namespace classifier::strategy
         return m_data;
     }
 
-    std::vector<classes::LabeledDistance> Knn::GetNeighbors()
-    {
-        return m_neighbors;
-    }
-
     classes::Data Knn::Classify(classes::Data &data)
     {
 
+        std::vector<classes::LabeledDistance> neighbors;
+
         std::ranges::transform(m_data,
-                               std::back_inserter(m_neighbors),
+                               std::back_inserter(neighbors),
                                [&data](const auto &dataPoint)
                                { return data.EuclideanDistance(dataPoint); });
 
-        std::ranges::sort(m_neighbors, [](const classes::LabeledDistance &a, const classes::LabeledDistance &b)
+        std::ranges::sort(neighbors, [](const classes::LabeledDistance &a, const classes::LabeledDistance &b)
                           { return a.Distance < b.Distance; });
 
         std::vector<classes::LabeledDistance> candidates;
 
         candidates.insert(candidates.begin(),
-                          m_neighbors.begin(),
-                          std::next(m_neighbors.begin(), std::min(m_neighbors.size(), static_cast<size_t>(m_k))));
+                          neighbors.begin(),
+                          std::next(neighbors.begin(), std::min(neighbors.size(), static_cast<size_t>(m_k))));
 
         std::vector<uint8_t> labels(m_k);
 

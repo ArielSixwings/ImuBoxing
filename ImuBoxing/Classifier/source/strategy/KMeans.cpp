@@ -22,15 +22,17 @@ namespace classifier::strategy
     classes::Data KMeans::Classify(classes::Data &data)
     {
 
+        std::vector<classes::LabeledDistance> meanDistances;
+
         std::ranges::transform(m_groups,
-                               std::back_inserter(m_meanDistances),
+                               std::back_inserter(meanDistances),
                                [&data](auto &group)
                                { return data.EuclideanDistance(group.GetMean().value()); });
 
-        std::ranges::sort(m_meanDistances, [](const classes::LabeledDistance &a, const classes::LabeledDistance &b)
+        std::ranges::sort(meanDistances, [](const classes::LabeledDistance &a, const classes::LabeledDistance &b)
                           { return a.Distance < b.Distance; });
 
-        data.Label = m_meanDistances.front().Label;
+        data.Label = meanDistances.front().Label;
         return data;
     }
 

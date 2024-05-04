@@ -34,12 +34,14 @@ namespace classifier
     void PoseClassification::topicCallback(const geometry_msgs::msg::Vector3::SharedPtr message)
     {
 
+        // RCLCPP_INFO(get_logger(), "%lf %lf %lf", message->x, message->y, message->z);
+
         std::vector<double> angles = {message->x, message->y, message->z};
 
         classes::Data dataPoint(angles, classifier::classes::Data::Poses::Unknown);
 
-        // const auto result = m_knn.Classify(dataPoint);
-        const auto result = m_kMeans.Classify(dataPoint);
+        const auto result = m_knn.Classify(dataPoint);
+        // const auto result = m_kMeans.Classify(dataPoint);
 
         switch (result.Label)
         {

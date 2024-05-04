@@ -46,9 +46,7 @@ namespace classifier
 
         std::string line;
 
-        size_t sizeToRead = 100;
-
-        for (size_t i = 0; (i < sizeToRead) and std::getline(file, line); i++)
+        for (size_t i = 0; std::getline(file, line); i++)
         {
             std::stringstream lineStream(line);
             std::vector<double> row;
@@ -77,11 +75,6 @@ namespace classifier
             classes::Data feature(row, label);
 
             data.push_back(feature);
-        }
-
-        for (size_t i = 0; i < data.size(); i++)
-        {
-            std::cout << data[i] << std::endl;
         }
 
         file.close();

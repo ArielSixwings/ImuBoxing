@@ -18,14 +18,12 @@ namespace classifier::strategy
         void AddData(const std::vector<classes::Data> &data);
 
         std::vector<classes::Data> GetData();
-        std::vector<classes::LabeledDistance> GetNeighbors();
 
         classes::Data Classify(classes::Data &data);
 
     private:
         uint8_t m_k;
 
-        std::vector<classes::LabeledDistance> m_neighbors;
         std::vector<classes::Data> m_data;
     };
 

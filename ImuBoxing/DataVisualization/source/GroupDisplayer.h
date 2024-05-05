@@ -20,8 +20,6 @@ namespace visualization
 {
     class GroupDisplayer
     {
-    private:
-        /* data */
     public:
         struct PointActor
         {
@@ -33,6 +31,18 @@ namespace visualization
             vtkSmartPointer<vtkActor> Actor;
         };
 
+        struct CartesianLineActor
+        {
+            CartesianLineActor(const std::vector<double> &colorAxis);
+
+            vtkSmartPointer<vtkLineSource> Line;
+            vtkSmartPointer<vtkPolyDataMapper> Mapper;
+            vtkSmartPointer<vtkActor> Actor;
+        };
+
         GroupDisplayer();
+
+    private:
+        std::vector<PointActor> m_points;
     };
 }

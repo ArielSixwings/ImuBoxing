@@ -105,7 +105,6 @@ int main()
     // Create actors for both spheres and set their properties
     vtkSmartPointer<vtkActor> largeSphereActorB = vtkSmartPointer<vtkActor>::New();
     largeSphereActorB->SetMapper(largeMapperB);
-    // Set color directly using RGB components
     largeSphereActorB->GetProperty()->SetColor(65.0 / 255.0, 105.0 / 255.0, 225.0 / 255.0); // RoyalBlue1 color
     largeSphereActorB->GetProperty()->SetOpacity(0.3);
 

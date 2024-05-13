@@ -1,0 +1,11 @@
+[INFO] [1714943352.589301403] [PoseClassification]: Mean: -1.100411 1.663938 0.849442 GUARD
+[INFO] [1714943352.589970100] [PoseClassification]: standar deviantion: 1.659983 
+
+[INFO] [1714943352.590572497] [PoseClassification]: Mean: -0.088908 0.242127 0.009735 JAB END
+[INFO] [1714943352.590589805] [PoseClassification]: standar deviantion: 1.515656 
+
+[INFO] [1714943352.591211657] [PoseClassification]: Mean: -0.038916 1.390083 -0.210620 HOOK END
+[INFO] [1714943352.591229528] [PoseClassification]: standar deviantion: 2.280423 
+
+[INFO] [1714943352.591809367] [PoseClassification]: Mean: -1.283240 0.009307 2.065155 UPPERCUT END
+[INFO] [1714943352.591822853] [PoseClassification]: standar deviantion: 5.006083 

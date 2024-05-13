@@ -18,11 +18,15 @@ find_package(geometry_msgs REQUIRED)
 find_package(std_srvs REQUIRED)
 find_package(Boost REQUIRED COMPONENTS system thread)
 
-add_subdirectory(Telemetry)
 add_subdirectory(Classifier)
+add_subdirectory(DataVisualization)
+add_subdirectory(Telemetry)
 
 add_executable(telemetry Telemetry/main.cpp)
 target_link_libraries(telemetry Boost::system Boost::thread telemetrySource)
 
 add_executable(classifier Classifier/main.cpp)
 target_link_libraries(classifier Boost::system Boost::thread classifierSource)
+
+add_executable(dataVisualization DataVisualization/main.cpp)
+target_link_libraries(dataVisualization Boost::system Boost::thread dataVisualizationSource)

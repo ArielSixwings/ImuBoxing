@@ -13,6 +13,8 @@ namespace classifier
         m_subscription = create_subscription<geometry_msgs::msg::Vector3>(
             "imu/Angles", 10, std::bind(&PoseClassification::topicCallback, this, std::placeholders::_1));
 
+        m_publisher = create_publisher<std_msgs::msg::Int32>("pose", 10);
+
         const std::string path = "ImuBoxing/data/";
 
         const auto guardData = Utils::ReadCSV(path + "guard.csv", classifier::classes::Data::Poses::Guard);
@@ -38,8 +40,6 @@ namespace classifier
 
     void PoseClassification::topicCallback(const geometry_msgs::msg::Vector3::SharedPtr message)
     {
-
-        // RCLCPP_INFO(get_logger(), "%lf %lf %lf", message->x, message->y, message->z);
 
         std::vector<double> angles = {message->x, message->y, message->z};
 
@@ -108,6 +108,12 @@ namespace classifier
         default:
             break;
         }
+
+        std_msgs::msg::Int32 pose;
+
+        pose.data = m_lastPose;
+
+        m_publisher->publish(pose);
     }
 
 };

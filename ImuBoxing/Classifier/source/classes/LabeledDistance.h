@@ -6,7 +6,6 @@
 
 namespace classifier::classes
 {
-
     struct LabeledDistance
     {
         LabeledDistance(const double distance, const uint8_t label)

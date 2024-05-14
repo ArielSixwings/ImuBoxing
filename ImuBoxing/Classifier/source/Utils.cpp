@@ -13,7 +13,6 @@
 
 namespace classifier
 {
-
     void Utils::PrintProgressBar(double percentage)
     {
         const int barWidth = 70; // Width of the progress bar in characters
@@ -80,5 +79,4 @@ namespace classifier
         file.close();
         return data;
     }
-
 }

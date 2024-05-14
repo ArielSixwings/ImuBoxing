@@ -7,7 +7,6 @@
 
 namespace classifier::strategy
 {
-
     void Knn::AddData(const std::vector<classes::Data> &data)
     {
         m_data.insert(m_data.end(), data.begin(), data.end());
@@ -66,5 +65,4 @@ namespace classifier::strategy
         data.Label = mostFrequentLabel;
         return data;
     }
-
 }

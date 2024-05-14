@@ -35,5 +35,4 @@ namespace classifier::strategy
         double m_lastMinimumDistance;
         std::vector<classes::Group> m_groups;
     };
-
 }

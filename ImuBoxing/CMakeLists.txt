@@ -25,8 +25,11 @@ add_subdirectory(Telemetry)
 add_executable(telemetry Telemetry/main.cpp)
 target_link_libraries(telemetry Boost::system Boost::thread telemetrySource)
 
-add_executable(classifier Classifier/main.cpp)
-target_link_libraries(classifier Boost::system Boost::thread classifierSource)
+add_executable(poseClassifier Classifier/PoseClassifier.cpp)
+target_link_libraries(poseClassifier Boost::system Boost::thread classifierSource)
+
+add_executable(techniqueClassifier Classifier/TechniqueClassifier.cpp)
+target_link_libraries(techniqueClassifier Boost::system Boost::thread classifierSource)
 
 add_executable(dataVisualization DataVisualization/main.cpp)
 target_link_libraries(dataVisualization Boost::system Boost::thread dataVisualizationSource)

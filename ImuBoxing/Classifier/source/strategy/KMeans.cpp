@@ -7,7 +7,6 @@
 
 namespace classifier::strategy
 {
-
     void KMeans::AddGroup(const classes::Group &group)
     {
         m_groups.push_back(group);
@@ -38,11 +37,10 @@ namespace classifier::strategy
         std::ranges::sort(candidates, [](const Candidate &a, const Candidate &b)
                           { return a.Point.Distance < b.Point.Distance; });
 
-        (candidates.front().Point.Distance < candidates.front().Threshold)
+        ((2 * candidates.front().Point.Distance) < candidates.front().Threshold)
             ? data.Label = candidates.front().Point.Label
             : data.Label = classes::Data::Poses::Unknown;
 
         return data;
     }
-
 }

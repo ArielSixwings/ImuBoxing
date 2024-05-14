@@ -9,7 +9,6 @@
 
 namespace classifier
 {
-
     class PoseClassification : public rclcpp::Node
     {
     public:

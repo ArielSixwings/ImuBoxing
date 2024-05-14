@@ -94,6 +94,17 @@ namespace classifier
             m_lastPose = classifier::classes::Data::Poses::UppercutEnd;
             break;
 
+        case classifier::classes::Data::Poses::Unknown:
+
+            if (m_lastPose != classifier::classes::Data::Poses::Unknown)
+            {
+
+                RCLCPP_INFO(get_logger(), "UNKNOWN");
+            }
+
+            m_lastPose = classifier::classes::Data::Poses::Unknown;
+            break;
+
         default:
             break;
         }

@@ -13,6 +13,15 @@ namespace classifier::strategy
     class KMeans
     {
     public:
+        struct Candidate
+        {
+            Candidate(const classes::LabeledDistance &point, double threshold)
+                : Point(point), Threshold(threshold) {}
+
+            classes::LabeledDistance Point;
+            double Threshold;
+        };
+
         KMeans() {}
 
         void AddGroup(const classes::Group &group);
@@ -20,7 +29,10 @@ namespace classifier::strategy
 
         classes::Data Classify(classes::Data &data);
 
+        double GetLastMinimumDistance();
+
     private:
+        double m_lastMinimumDistance;
         std::vector<classes::Group> m_groups;
     };
 

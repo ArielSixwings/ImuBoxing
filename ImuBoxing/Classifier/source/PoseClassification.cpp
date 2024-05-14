@@ -25,10 +25,15 @@ namespace classifier
         m_knn.AddData(hookEndData);
         m_knn.AddData(uppercutEndData);
 
-        m_kMeans.AddGroup(guardData);
-        m_kMeans.AddGroup(jabEndData);
-        m_kMeans.AddGroup(hookEndData);
-        m_kMeans.AddGroup(uppercutEndData);
+        classifier::classes::Group guardGroup(guardData);
+        classifier::classes::Group jabEndGroup(jabEndData);
+        classifier::classes::Group hookEndGroup(hookEndData);
+        classifier::classes::Group uppercutEndGroup(uppercutEndData);
+
+        m_kMeans.AddGroup(guardGroup);
+        m_kMeans.AddGroup(jabEndGroup);
+        m_kMeans.AddGroup(hookEndGroup);
+        m_kMeans.AddGroup(uppercutEndGroup);
     }
 
     void PoseClassification::topicCallback(const geometry_msgs::msg::Vector3::SharedPtr message)
@@ -38,10 +43,10 @@ namespace classifier
 
         std::vector<double> angles = {message->x, message->y, message->z};
 
-        classes::Data dataPoint(angles, classifier::classes::Data::Poses::Unknown);
+        classes::Data dataPoint(angles, classifier::classes::Data::Poses::Unclassified);
 
-        const auto result = m_knn.Classify(dataPoint);
-        // const auto result = m_kMeans.Classify(dataPoint);
+        // const auto result = m_knn.Classify(dataPoint);
+        const auto result = m_kMeans.Classify(dataPoint);
 
         switch (result.Label)
         {

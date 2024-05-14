@@ -76,7 +76,8 @@ SCENARIO("Should Classify the data according to the KMeans rule", "[Unit][strate
 
                 AND_GIVEN("A Data at 0.0, 85.0, 85.0")
                 {
-                    classifier::classes::Data dataPoint({0.0, 85.0, 85.0}, 100);
+                    classifier::classes::Data dataPoint({0.0, 85.0, 85.0},
+                                                        classifier::classes::Data::Poses::Unclassified);
 
                     WHEN("Classify is called")
                     {
@@ -90,31 +91,25 @@ SCENARIO("Should Classify the data according to the KMeans rule", "[Unit][strate
                         }
                     }
                 }
+
+                AND_GIVEN("A Data at 45.0, 45.0, 45.0")
+                {
+                    classifier::classes::Data dataPoint({45.0, 45.0, 45.0}, classifier::classes::Data::Poses::Unclassified);
+
+                    WHEN("Classify is called")
+                    {
+                        const auto result = KMeans.Classify(dataPoint);
+
+                        THEN("Resulting data is classified to group B")
+                        {
+                            classifier::classes::Data dataPointCompare({45.0, 45.0, 45.0},
+                                                                       classifier::classes::Data::Poses::Unknown);
+
+                            CHECK(dataPoint == dataPointCompare);
+                        }
+                    }
+                }
             }
         }
     }
 }
-
-// SCENARIO("Should use groups with distances bigger than the standard deviation", "")
-// {
-
-//     GIVEN("The current 4 groups")
-//     {
-//         const std::string path = "ImuBoxing/data/";
-
-//         const auto guardData = Utils::ReadCSV(path + "guard.csv", classifier::classes::Data::Poses::Guard);
-//         const auto jabEndData = Utils::ReadCSV(path + "jabEnd.csv", classifier::classes::Data::Poses::JabEnd);
-//         const auto hookEndData = Utils::ReadCSV(path + "hookEnd.csv", classifier::classes::Data::Poses::HookEnd);
-//         const auto uppercutEndData = Utils::ReadCSV(path + "uppercutEnd.csv", classifier::classes::Data::Poses::UppercutEnd);
-
-//         classifier::strategy::KMeans KMeans;
-//         KMeans.AddGroup(guardData);
-//         KMeans.AddGroup(jabEndData);
-//         KMeans.AddGroup(hookEndData);
-//         KMeans.AddGroup(uppercutEndData);
-
-//         WHEN("Separation status is called")
-//         {
-//         }
-//     }
-// }

@@ -39,30 +39,6 @@ namespace telemetry
         m_isValid = true;
     }
 
-    std::string SpaceSensor::CreateImuCommand(int logicalId,
-                                              int commandNumber,
-                                              const std::vector<int> &arguments)
-    {
-        std::ostringstream command;
-
-        command << ">" << logicalId << "," << commandNumber;
-
-        if (not arguments.empty())
-        {
-            command << ",";
-
-            for (auto argument : arguments)
-            {
-                command << argument;
-            }
-
-            command << ",";
-        }
-
-        command << "\n";
-        return command.str();
-    }
-
     std::vector<uint8_t> SpaceSensor::BinaryCommand::Get()
     {
         std::vector<uint8_t> commandBuffer{StartOfPacket, LogicalId, Command};

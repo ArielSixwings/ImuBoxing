@@ -9,7 +9,6 @@
 
 namespace classifier::classes
 {
-
     LabeledDistance Data::EuclideanDistance(const Data &other)
     {
         if (Features.size() != other.Features.size())

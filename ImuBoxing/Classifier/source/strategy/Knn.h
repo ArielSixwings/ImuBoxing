@@ -26,5 +26,4 @@ namespace classifier::strategy
 
         std::vector<classes::Data> m_data;
     };
-
 }

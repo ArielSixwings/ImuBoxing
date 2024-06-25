@@ -6,6 +6,7 @@ add_library(classifierSource
             classes/LabeledDistance.cpp
             FeatureExtractor.cpp 
             PoseClassification.cpp
+            TechniqueClassification.cpp
             strategy/KMeans.cpp 
             strategy/Knn.cpp 
             Utils.cpp )

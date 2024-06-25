@@ -7,7 +7,6 @@
 
 namespace classifier::strategy
 {
-
     void KMeans::AddGroup(const classes::Group &group)
     {
         m_groups.push_back(group);
@@ -19,21 +18,29 @@ namespace classifier::strategy
         m_groups.push_back(group);
     }
 
+    double KMeans::GetLastMinimumDistance()
+    {
+        return m_lastMinimumDistance;
+    }
+
     classes::Data KMeans::Classify(classes::Data &data)
     {
 
-        std::vector<classes::LabeledDistance> meanDistances;
+        std::vector<Candidate> candidates;
 
         std::ranges::transform(m_groups,
-                               std::back_inserter(meanDistances),
+                               std::back_inserter(candidates),
                                [&data](auto &group)
-                               { return data.EuclideanDistance(group.GetMean().value()); });
+                               { return Candidate(data.EuclideanDistance(group.GetMean().value()),
+                                                  group.GetStandardDeviation().value()); });
 
-        std::ranges::sort(meanDistances, [](const classes::LabeledDistance &a, const classes::LabeledDistance &b)
-                          { return a.Distance < b.Distance; });
+        std::ranges::sort(candidates, [](const Candidate &a, const Candidate &b)
+                          { return a.Point.Distance < b.Point.Distance; });
 
-        data.Label = meanDistances.front().Label;
+        ((2 * candidates.front().Point.Distance) < candidates.front().Threshold)
+            ? data.Label = candidates.front().Point.Label
+            : data.Label = classes::Data::Poses::Unknown;
+
         return data;
     }
-
 }

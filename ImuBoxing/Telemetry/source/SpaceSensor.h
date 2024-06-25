@@ -120,9 +120,5 @@ namespace telemetry
         };
 
         static std::vector<float> ParseEulerAngle(const std::vector<uint8_t> &responseData);
-
-        static std::string CreateImuCommand(int logicalId,
-                                            int commandNumber,
-                                            const std::vector<int> &arguments = {});
     };
 }

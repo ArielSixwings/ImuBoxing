@@ -6,7 +6,6 @@
 
 namespace classifier
 {
-
     class FeatureExtractor : public rclcpp::Node
     {
     public:

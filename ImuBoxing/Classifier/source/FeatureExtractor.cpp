@@ -6,7 +6,6 @@
 
 namespace classifier
 {
-
     FeatureExtractor::FeatureExtractor(const std::string &fileName,
                                        const size_t numberOfEntries,
                                        const bool inTest) : Node("FeatureExtractor"),
@@ -64,5 +63,4 @@ namespace classifier
 
         // RCLCPP_INFO(get_logger(), "Features saved to %s", m_fileName.c_str());
     }
-
 };

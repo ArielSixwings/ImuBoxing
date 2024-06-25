@@ -17,5 +17,4 @@ namespace classifier
         static std::vector<classes::Data> ReadCSV(const std::string &filename,
                                                   const int label);
     };
-
 }

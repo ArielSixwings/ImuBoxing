@@ -119,6 +119,11 @@ namespace telemetry
             bool m_isValid = false;
         };
 
+        static std::vector<float> Parser(const std::vector<uint8_t> &responseData,
+                                         const uint8_t dataSize);
+
         static std::vector<float> ParseEulerAngle(const std::vector<uint8_t> &responseData);
+
+        static std::vector<float> ParseQuaternion(const std::vector<uint8_t> &responseData);
     };
 }

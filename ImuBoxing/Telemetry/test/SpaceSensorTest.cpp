@@ -133,3 +133,30 @@ SCENARIO("Should validate a BinaryResponse", "[Unit][SpaceSensor][BinaryResponse
     }
   }
 }
+
+SCENARIO("Should parse a response data to an Quaternion", "[Unit][SpaceSensor]")
+{
+
+  GIVEN("A vector of bytes representing angles 0.5, -0.5, 0.7071 and -0.7071 in Quaternion")
+  {
+    const std::vector<uint8_t> responseData = {
+        0x3F, 0x00, 0x00, 0x00, // 0.5
+        0xBF, 0x00, 0x00, 0x00, // -0.5
+        0x3F, 0x35, 0x04, 0xF3, // 0.7071
+        0xBF, 0x35, 0x04, 0xF3  // -0.7071
+    };
+
+    WHEN("ParseQuaternion is called")
+    {
+      auto angles = SpaceSensor::ParseQuaternion(responseData);
+
+      THEN("Resulting angles is a std::vector<float> with 1.5708, 0.7854, 0.17628")
+      {
+        const std::vector<float> anglesCompare = {0.5, -0.5, 0.7071, -0.7071};
+
+        CHECK(std::ranges::equal(angles, anglesCompare, [](float angle, float angleCompare)
+                                 { return angle == Catch::Approx(angleCompare); }));
+      }
+    }
+  }
+}

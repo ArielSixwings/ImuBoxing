@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <cstring>
 #include <iomanip>
+#include <ranges>
 #include <iterator>
 #include <sstream>
 #include <iostream>
@@ -60,22 +61,40 @@ namespace telemetry
             return angles;
         }
 
-        float roll;
-        float pitch;
-        float yaw;
+        angles = Parser(responseData, ResponsesSizes::EulerAngle);
 
-        std::memcpy(&roll, responseData.data(), sizeof(float));
-        std::reverse(reinterpret_cast<uint8_t *>(&roll), reinterpret_cast<uint8_t *>(&roll) + sizeof(float));
+        return angles;
+    }
 
-        std::memcpy(&pitch, responseData.data() + sizeof(float), sizeof(float));
-        std::reverse(reinterpret_cast<uint8_t *>(&pitch), reinterpret_cast<uint8_t *>(&pitch) + sizeof(float));
+    std::vector<float> SpaceSensor::ParseQuaternion(const std::vector<uint8_t> &responseData)
+    {
+        std::vector<float> angles;
 
-        std::memcpy(&yaw, responseData.data() + 2 * sizeof(float), sizeof(float));
-        std::reverse(reinterpret_cast<uint8_t *>(&yaw), reinterpret_cast<uint8_t *>(&yaw) + sizeof(float));
+        if (responseData.size() < ResponsesSizes::Quaternion)
+        {
+            return angles;
+        }
 
-        angles.push_back(roll);
-        angles.push_back(pitch);
-        angles.push_back(yaw);
+        angles = Parser(responseData, ResponsesSizes::Quaternion);
+
+        return angles;
+    }
+
+    std::vector<float> SpaceSensor::Parser(const std::vector<uint8_t> &responseData, const uint8_t dataSize)
+    {
+        std::vector<float> angles;
+        const auto steps = dataSize / 4;
+
+        std::ranges::for_each(std::views::iota(0, steps),
+                              [&angles, &responseData](const auto step)
+                              {
+                                  float data;
+
+                                  std::memcpy(&data, responseData.data() + (step * sizeof(float)), sizeof(float));
+                                  std::reverse(reinterpret_cast<uint8_t *>(&data), reinterpret_cast<uint8_t *>(&data) + sizeof(float));
+
+                                  angles.push_back(data);
+                              });
 
         return angles;
     }

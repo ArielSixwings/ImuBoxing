@@ -13,10 +13,10 @@ namespace classifier::classes
     {
         if (Features.size() != other.Features.size())
         {
-            throw std::invalid_argument("Data Features must be of the same size.");
+            throw std::invalid_argument("Data Features must be of the same size");
         }
 
-        double sumSquaredDiff = 0.0;
+        float sumSquaredDiff = 0.0;
 
         for (size_t i = 0; i < Features.size(); i++)
         {
@@ -32,11 +32,11 @@ namespace classifier::classes
 
         result.Label = Label;
         std::transform(Features.begin(), Features.end(), other.Features.begin(),
-                       std::back_inserter(result.Features), std::plus<double>());
+                       std::back_inserter(result.Features), std::plus<float>());
         return result;
     }
 
-    Data Data::operator/(double divisor) const
+    Data Data::operator/(float divisor) const
     {
         if (divisor == 0)
         {
@@ -46,7 +46,7 @@ namespace classifier::classes
         Data result;
         result.Label = Label;
         std::ranges::transform(Features, std::back_inserter(result.Features),
-                               [divisor](double feature)
+                               [divisor](float feature)
                                { return feature / divisor; });
         return result;
     }

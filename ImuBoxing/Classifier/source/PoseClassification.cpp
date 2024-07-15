@@ -9,17 +9,17 @@ namespace classifier
     PoseClassification::PoseClassification() : Node("PoseClassification")
     {
 
-        m_subscription = create_subscription<geometry_msgs::msg::Vector3>(
+        m_subscription = create_subscription<std_msgs::msg::Float32MultiArray>(
             "imu/Angles", 10, std::bind(&PoseClassification::topicCallback, this, std::placeholders::_1));
 
         m_publisher = create_publisher<std_msgs::msg::Int32>("pose", 10);
 
         const std::string path = "ImuBoxing/data/";
 
-        const auto guardData = Utils::ReadCSV(path + "guard.csv", classes::Data::Poses::Guard);
-        const auto jabEndData = Utils::ReadCSV(path + "jabEnd.csv", classes::Data::Poses::JabEnd);
-        const auto hookEndData = Utils::ReadCSV(path + "hookEnd.csv", classes::Data::Poses::HookEnd);
-        const auto uppercutEndData = Utils::ReadCSV(path + "uppercutEnd.csv", classes::Data::Poses::UppercutEnd);
+        const auto guardData = Utils::ReadCSV(path + "guardQuaternion.csv", classes::Data::Poses::Guard);
+        const auto jabEndData = Utils::ReadCSV(path + "jabEndQuaternion.csv", classes::Data::Poses::JabEnd);
+        const auto hookEndData = Utils::ReadCSV(path + "hookEndQuaternion.csv", classes::Data::Poses::HookEnd);
+        const auto uppercutEndData = Utils::ReadCSV(path + "uppercutEndQuaternion.csv", classes::Data::Poses::UppercutEnd);
 
         m_knn.AddData(guardData);
         m_knn.AddData(jabEndData);
@@ -37,10 +37,10 @@ namespace classifier
         m_kMeans.AddGroup(uppercutEndGroup);
     }
 
-    void PoseClassification::topicCallback(const geometry_msgs::msg::Vector3::SharedPtr message)
+    void PoseClassification::topicCallback(const std_msgs::msg::Float32MultiArray::SharedPtr message)
     {
 
-        std::vector<double> angles = {message->x, message->y, message->z};
+        std::vector<float> angles = message->data;
 
         classes::Data dataPoint(angles, classes::Data::Poses::Unclassified);
 

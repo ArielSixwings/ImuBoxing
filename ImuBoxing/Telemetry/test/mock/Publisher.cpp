@@ -1,5 +1,5 @@
 #include <rclcpp/rclcpp.hpp>
-#include <geometry_msgs/msg/vector3.hpp>
+#include <std_msgs/msg/float32_multi_array.hpp>
 #include <chrono>
 #include <functional>
 #include <memory>
@@ -19,7 +19,7 @@ namespace mock
 
             RCLCPP_INFO(get_logger(), "Starting Publisher mock");
 
-            m_publisher = create_publisher<geometry_msgs::msg::Vector3>("mock/Angles", 10);
+            m_publisher = create_publisher<std_msgs::msg::Float32MultiArray>("mock/Angles", 10);
 
             m_timer = create_wall_timer(500ms, std::bind(&Publisher::timer_callback, this));
         }
@@ -27,10 +27,8 @@ namespace mock
     private:
         void timer_callback()
         {
-            geometry_msgs::msg::Vector3 message;
-            message.x = m_count;
-            message.y = m_count;
-            message.z = m_count;
+            std_msgs::msg::Float32MultiArray message;
+            message.data = {m_count, m_count, m_count, m_count};
 
             ++m_count;
 
@@ -38,7 +36,7 @@ namespace mock
         }
 
         rclcpp::TimerBase::SharedPtr m_timer;
-        rclcpp::Publisher<geometry_msgs::msg::Vector3>::SharedPtr m_publisher;
+        rclcpp::Publisher<std_msgs::msg::Float32MultiArray>::SharedPtr m_publisher;
 
         float m_count = 0.0;
     };

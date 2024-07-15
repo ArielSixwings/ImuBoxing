@@ -37,17 +37,17 @@ namespace classifier::classes
             return {};
         }
 
-        classes::Data sumOfData(std::vector<double>(numFeatures, 0.0), label);
+        classes::Data sumOfData(std::vector<float>(numFeatures, 0.0), label);
 
         std::ranges::for_each(m_points, [&sumOfData](const auto point)
                               { sumOfData = sumOfData + point; });
 
-        const auto mean = sumOfData / static_cast<double>(m_points.size());
+        const auto mean = sumOfData / static_cast<float>(m_points.size());
 
         return mean;
     }
 
-    std::optional<double> Group::StandardDeviation()
+    std::optional<float> Group::StandardDeviation()
     {
         if (m_points.empty())
         {
@@ -66,7 +66,7 @@ namespace classifier::classes
                                [&](const auto &dataPoint)
                                { return m_mean.value().EuclideanDistance(dataPoint); });
 
-        double squareSum = 0.0;
+        float squareSum = 0.0;
 
         std::ranges::for_each(distances, [&squareSum](const auto distance)
                               { squareSum += std::pow(distance.Distance, 2); });
@@ -80,7 +80,7 @@ namespace classifier::classes
     {
         return m_mean;
     }
-    std::optional<double> Group::GetStandardDeviation()
+    std::optional<float> Group::GetStandardDeviation()
     {
         return m_standardDeviation;
     }

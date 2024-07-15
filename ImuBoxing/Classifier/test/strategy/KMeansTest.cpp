@@ -13,18 +13,18 @@ SCENARIO("Should Classify the data according to the KMeans rule", "[Unit][strate
 
     GIVEN("a vector of Data centered at 90.0, 0.0, 45.0")
     {
-        std::vector<std::vector<double>> featuresA;
+        std::vector<std::vector<float>> featuresA;
 
         for (int i = 0; i < 10; ++i)
         {
 
-            std::vector<double> point = {90.0, 0.0, 45.0};
+            std::vector<float> point = {90.0, 0.0, 45.0};
 
             std::random_device randomDevice;
             std::mt19937 generator(randomDevice());
-            std::uniform_real_distribution<double> distribution(-5.0, 5.0);
+            std::uniform_real_distribution<float> distribution(-5.0, 5.0);
 
-            double randomValue = distribution(generator);
+            float randomValue = distribution(generator);
 
             std::ranges::for_each(point, [&randomValue](auto &entry)
                                   { entry += randomValue; });
@@ -42,17 +42,17 @@ SCENARIO("Should Classify the data according to the KMeans rule", "[Unit][strate
         AND_GIVEN("a vector of Data centered at 0.0, 90.0, 90.0")
         {
 
-            std::vector<std::vector<double>> featuresB;
+            std::vector<std::vector<float>> featuresB;
             for (int i = 0; i < 10; ++i)
             {
 
-                std::vector<double> point = {0.0, 90.0, 90.0};
+                std::vector<float> point = {0.0, 90.0, 90.0};
 
                 std::random_device randomDevice;
                 std::mt19937 generator(randomDevice());
-                std::uniform_real_distribution<double> distribution(-5.0, 5.0);
+                std::uniform_real_distribution<float> distribution(-5.0, 5.0);
 
-                double randomValue = distribution(generator);
+                float randomValue = distribution(generator);
 
                 std::ranges::for_each(point, [&randomValue](auto &entry)
                                       { entry += randomValue; });

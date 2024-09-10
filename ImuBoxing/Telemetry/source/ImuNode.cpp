@@ -54,7 +54,6 @@ namespace telemetry
         SetStreamingTiming(5);
 
         SetCompassEnabledToZero();
-        // SetEulerAngleDecompositionOrder();
 
         m_timer = create_wall_timer(std::chrono::milliseconds(5),
                                     std::bind(&ImuNode::LoopCallback, this));

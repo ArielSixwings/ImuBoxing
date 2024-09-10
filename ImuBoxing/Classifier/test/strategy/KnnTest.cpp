@@ -57,7 +57,6 @@ SCENARIO("Should add data to a Knn Object", "[Unit][strategy][Knn][AddData][GetD
 
 SCENARIO("Should Classify the data according to the Knn rule", "[Unit][strategy][Knn][Classify]")
 {
-
     GIVEN("a vector of Data centered at 90.0, 0.0, 45.0")
     {
         std::vector<std::vector<float>> features1;

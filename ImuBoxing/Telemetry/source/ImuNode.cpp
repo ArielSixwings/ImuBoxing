@@ -21,7 +21,7 @@ namespace telemetry
 
         m_serialPort->set_option(boost::asio::serial_port_base::baud_rate(115200));
 
-        m_publisher = create_publisher<geometry_msgs::msg::Vector3>("imu/Angles", 1);
+        m_publisher = create_publisher<std_msgs::msg::Float32MultiArray>("imu/Angles", 1);
 
         m_startService = create_service<std_srvs::srv::Empty>(
             "imu/start", std::bind(&ImuNode::StartStreaming, this, std::placeholders::_1, std::placeholders::_2),
@@ -42,7 +42,7 @@ namespace telemetry
         m_serviceBaseOffset = create_service<std_srvs::srv::Empty>(
             "imu/baseOffset", std::bind(&ImuNode::SetBaseOffsetWithCurrentOrientation, this, std::placeholders::_1, std::placeholders::_2));
 
-        SetStreamingSlots({SpaceSensor::StreamingCommand::ReadTaredOrientationAsEulerAngles,
+        SetStreamingSlots({SpaceSensor::StreamingCommand::ReadTaredOrientationAsQuaternion,
                            SpaceSensor::StreamingCommand::NoCommand,
                            SpaceSensor::StreamingCommand::NoCommand,
                            SpaceSensor::StreamingCommand::NoCommand,
@@ -54,7 +54,6 @@ namespace telemetry
         SetStreamingTiming(5);
 
         SetCompassEnabledToZero();
-        SetEulerAngleDecompositionOrder();
 
         m_timer = create_wall_timer(std::chrono::milliseconds(5),
                                     std::bind(&ImuNode::LoopCallback, this));
@@ -236,18 +235,18 @@ namespace telemetry
             return;
         }
 
-        constexpr int eulerAngleBinaryResponseSize = (SpaceSensor::ResponsesSizes::Header + SpaceSensor::ResponsesSizes::EulerAngle);
+        constexpr int quaternionBinaryResponseSize = (SpaceSensor::ResponsesSizes::Header + SpaceSensor::ResponsesSizes::Quaternion);
 
-        if (bytesAvailable < eulerAngleBinaryResponseSize)
+        if (bytesAvailable < quaternionBinaryResponseSize)
         {
-            RCLCPP_INFO(get_logger(), "Not enough bytes available");
+            // RCLCPP_INFO(get_logger(), "Not enough bytes available");
             return;
         }
 
-        std::vector<uint8_t> responseBuffer(15);
+        std::vector<uint8_t> responseBuffer(quaternionBinaryResponseSize);
 
         const auto bytesRead = m_serialPort->read_some(boost::asio::buffer(responseBuffer,
-                                                                           eulerAngleBinaryResponseSize));
+                                                                           quaternionBinaryResponseSize));
 
         if (bytesRead <= 0)
         {
@@ -255,7 +254,7 @@ namespace telemetry
             return;
         }
 
-        SpaceSensor::BinaryResponse binaryResponse(responseBuffer, SpaceSensor::ResponsesSizes::EulerAngle);
+        SpaceSensor::BinaryResponse binaryResponse(responseBuffer, SpaceSensor::ResponsesSizes::Quaternion);
 
         if (not binaryResponse.IsValid())
         {
@@ -266,6 +265,7 @@ namespace telemetry
             return;
         }
 
+        // std::cout << "Data acquired:" << std::endl;
         for (size_t i = 0; i < responseBuffer.size(); ++i)
         {
             std::cout << "0x" << std::setfill('0') << std::setw(2) << std::hex << static_cast<int>(responseBuffer[i]);
@@ -275,12 +275,19 @@ namespace telemetry
 
         std::cout << std::endl;
 
-        const auto angles = SpaceSensor::ParseEulerAngle(binaryResponse.ResponseData);
+        const auto angles = SpaceSensor::ParseQuaternion(binaryResponse.ResponseData);
 
-        geometry_msgs::msg::Vector3 message;
-        message.x = angles[0];
-        message.y = angles[1];
-        message.z = angles[2];
+        // std::cout << "Quaternion" << std::endl;
+
+        for (const auto &angle : angles)
+        {
+            std::cout << ", " << angle;
+        }
+
+        std::cout << std::endl;
+
+        std_msgs::msg::Float32MultiArray message;
+        message.data = {angles[0], angles[1], angles[2], angles[3]};
 
         m_publisher->publish(message);
     }

@@ -11,14 +11,14 @@ namespace classifier::classes
         Group(const std::vector<Data> &points);
 
         std::optional<Data> Mean();
-        std::optional<double> StandardDeviation();
+        std::optional<float> StandardDeviation();
 
         std::optional<Data> GetMean();
-        std::optional<double> GetStandardDeviation();
+        std::optional<float> GetStandardDeviation();
 
     private:
         std::vector<Data> m_points;
         std::optional<Data> m_mean;
-        std::optional<double> m_standardDeviation;
+        std::optional<float> m_standardDeviation;
     };
 }

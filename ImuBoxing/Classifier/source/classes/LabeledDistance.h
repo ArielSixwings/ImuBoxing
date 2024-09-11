@@ -8,7 +8,7 @@ namespace classifier::classes
 {
     struct LabeledDistance
     {
-        LabeledDistance(const double distance, const uint8_t label)
+        LabeledDistance(const float distance, const uint8_t label)
             : Distance(distance), Label(label)
         {
         }
@@ -20,7 +20,7 @@ namespace classifier::classes
 
         bool operator==(const LabeledDistance &other) const = default;
 
-        double Distance;
+        float Distance;
         uint8_t Label;
     };
 

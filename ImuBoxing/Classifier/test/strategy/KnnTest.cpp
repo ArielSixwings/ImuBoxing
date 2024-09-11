@@ -16,18 +16,18 @@ SCENARIO("Should add data to a Knn Object", "[Unit][strategy][Knn][AddData][GetD
 
         AND_GIVEN("a vector of Data")
         {
-            std::vector<std::vector<double>> features;
+            std::vector<std::vector<float>> features;
 
             for (int i = 0; i < 10; ++i)
             {
 
-                std::vector<double> group = {90.0, 0.0, 45.0};
+                std::vector<float> group = {90.0, 0.0, 45.0};
 
                 std::random_device randomDevice;
                 std::mt19937 generator(randomDevice());
-                std::uniform_real_distribution<double> distribution(-5.0, 5.0);
+                std::uniform_real_distribution<float> distribution(-5.0, 5.0);
 
-                double randomValue = distribution(generator);
+                float randomValue = distribution(generator);
 
                 std::ranges::for_each(group, [&randomValue](auto &entry)
                                       { entry += randomValue; });
@@ -57,21 +57,20 @@ SCENARIO("Should add data to a Knn Object", "[Unit][strategy][Knn][AddData][GetD
 
 SCENARIO("Should Classify the data according to the Knn rule", "[Unit][strategy][Knn][Classify]")
 {
-
     GIVEN("a vector of Data centered at 90.0, 0.0, 45.0")
     {
-        std::vector<std::vector<double>> features1;
+        std::vector<std::vector<float>> features1;
 
         for (int i = 0; i < 10; ++i)
         {
 
-            std::vector<double> point = {90.0, 0.0, 45.0};
+            std::vector<float> point = {90.0, 0.0, 45.0};
 
             std::random_device randomDevice;
             std::mt19937 generator(randomDevice());
-            std::uniform_real_distribution<double> distribution(-5.0, 5.0);
+            std::uniform_real_distribution<float> distribution(-5.0, 5.0);
 
-            double randomValue = distribution(generator);
+            float randomValue = distribution(generator);
 
             std::ranges::for_each(point, [&randomValue](auto &entry)
                                   { entry += randomValue; });
@@ -89,17 +88,17 @@ SCENARIO("Should Classify the data according to the Knn rule", "[Unit][strategy]
         AND_GIVEN("a vector of Data centered at 0.0, 90.0, 90.0")
         {
 
-            std::vector<std::vector<double>> features2;
+            std::vector<std::vector<float>> features2;
             for (int i = 0; i < 10; ++i)
             {
 
-                std::vector<double> point = {0.0, 90.0, 90.0};
+                std::vector<float> point = {0.0, 90.0, 90.0};
 
                 std::random_device randomDevice;
                 std::mt19937 generator(randomDevice());
-                std::uniform_real_distribution<double> distribution(-5.0, 5.0);
+                std::uniform_real_distribution<float> distribution(-5.0, 5.0);
 
-                double randomValue = distribution(generator);
+                float randomValue = distribution(generator);
 
                 std::ranges::for_each(point, [&randomValue](auto &entry)
                                       { entry += randomValue; });

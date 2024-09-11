@@ -83,7 +83,7 @@ namespace telemetry
     std::vector<float> SpaceSensor::Parser(const std::vector<uint8_t> &responseData, const uint8_t dataSize)
     {
         std::vector<float> angles;
-        const auto steps = dataSize / 4;
+        const auto steps = dataSize / 4; // float size
 
         std::ranges::for_each(std::views::iota(0, steps),
                               [&angles, &responseData](const auto step)

@@ -2,7 +2,7 @@
 #pragma once
 
 #include "rclcpp/rclcpp.hpp"
-#include "geometry_msgs/msg/vector3.hpp"
+#include <std_msgs/msg/float32_multi_array.hpp>
 
 namespace classifier
 {
@@ -13,12 +13,12 @@ namespace classifier
                          const size_t numberOfEntries,
                          const bool inTest = false);
 
-        void SaveCsv(const std::vector<double> &features);
+        void SaveCsv(const std::vector<float> &features);
 
     private:
-        void topicCallback(const geometry_msgs::msg::Vector3::SharedPtr message);
+        void topicCallback(const std_msgs::msg::Float32MultiArray::SharedPtr message);
 
-        rclcpp::Subscription<geometry_msgs::msg::Vector3>::SharedPtr m_subscription;
+        rclcpp::Subscription<std_msgs::msg::Float32MultiArray>::SharedPtr m_subscription;
 
         size_t m_count = 0;
         size_t m_numberOfEntries;

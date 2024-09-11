@@ -25,6 +25,9 @@ add_subdirectory(Telemetry)
 add_executable(telemetry Telemetry/main.cpp)
 target_link_libraries(telemetry Boost::system Boost::thread telemetrySource)
 
+add_executable(featureExtractor Classifier/FeatureExtractor.cpp)
+target_link_libraries(featureExtractor Boost::system Boost::thread classifierSource)
+
 add_executable(poseClassifier Classifier/PoseClassifier.cpp)
 target_link_libraries(poseClassifier Boost::system Boost::thread classifierSource)
 

@@ -5,7 +5,7 @@
 #include <rclcpp/rclcpp.hpp>
 #include <std_srvs/srv/empty.hpp>
 #include <boost/asio.hpp>
-#include <geometry_msgs/msg/vector3.hpp>
+#include <std_msgs/msg/float32_multi_array.hpp>
 
 namespace telemetry
 {
@@ -48,7 +48,7 @@ namespace telemetry
         int imuNumber = 3;
         bool m_streaming = false;
 
-        rclcpp::Publisher<geometry_msgs::msg::Vector3>::SharedPtr m_publisher;
+        rclcpp::Publisher<std_msgs::msg::Float32MultiArray>::SharedPtr m_publisher;
 
         std::shared_ptr<boost::asio::serial_port> m_serialPort;
         boost::asio::io_service m_io;

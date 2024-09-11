@@ -18,7 +18,7 @@ namespace classifier::strategy
         m_groups.push_back(group);
     }
 
-    double KMeans::GetLastMinimumDistance()
+    float KMeans::GetLastMinimumDistance()
     {
         return m_lastMinimumDistance;
     }

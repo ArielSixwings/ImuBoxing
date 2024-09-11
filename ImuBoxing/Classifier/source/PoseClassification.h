@@ -4,7 +4,7 @@
 #include "strategy/KMeans.h"
 
 #include "rclcpp/rclcpp.hpp"
-#include "geometry_msgs/msg/vector3.hpp"
+#include <std_msgs/msg/float32_multi_array.hpp>
 #include "std_msgs/msg/int32.hpp"
 
 namespace classifier
@@ -15,9 +15,9 @@ namespace classifier
         PoseClassification();
 
     private:
-        void topicCallback(const geometry_msgs::msg::Vector3::SharedPtr message);
+        void topicCallback(const std_msgs::msg::Float32MultiArray::SharedPtr message);
 
-        rclcpp::Subscription<geometry_msgs::msg::Vector3>::SharedPtr m_subscription;
+        rclcpp::Subscription<std_msgs::msg::Float32MultiArray>::SharedPtr m_subscription;
         rclcpp::Publisher<std_msgs::msg::Int32>::SharedPtr m_publisher;
 
         strategy::Knn m_knn;

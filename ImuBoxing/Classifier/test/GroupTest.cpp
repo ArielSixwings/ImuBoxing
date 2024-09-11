@@ -12,12 +12,12 @@ SCENARIO("Should calculate the mean point  of a Data vector", "[Unit][Group][Mea
 
     GIVEN("a vector of Data")
     {
-        std::vector<std::vector<double>> features;
+        std::vector<std::vector<float>> features;
 
         for (int i = 0; i < 10; ++i)
         {
 
-            std::vector<double> group = {90.0, 0.0, 45.0};
+            std::vector<float> group = {90.0, 0.0, 45.0, 20};
 
             std::ranges::for_each(group, [&i](auto &entry)
                                   { entry += i; });
@@ -47,8 +47,8 @@ SCENARIO("Should calculate the mean point  of a Data vector", "[Unit][Group][Mea
 
                 AND_THEN("Mean and StandardDeviation result has expected value")
                 {
-                    const classifier::classes::Data meanCompare({94.5, 4.5, 49.5}, 6);
-                    const double standardDeviationCompare = 15.7321327226;
+                    const classifier::classes::Data meanCompare({94.5, 4.5, 49.5, 20}, 6);
+                    const float standardDeviationCompare = 15.7321327226;
 
                     CHECK(mean.value() == meanCompare);
                     CHECK(standardDeviation.value() == Catch::Approx(standardDeviationCompare));

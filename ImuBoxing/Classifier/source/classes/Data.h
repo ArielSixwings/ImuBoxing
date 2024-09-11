@@ -20,19 +20,19 @@ namespace classifier::classes
             Unclassified = 255
         };
 
-        std::vector<double> Features;
+        std::vector<float> Features;
         uint8_t Label;
 
         Data() : Features({}), Label(0) {}
 
-        Data(const std::vector<double> &features,
+        Data(const std::vector<float> &features,
              const uint8_t label) : Features(features),
                                     Label(label) {}
 
         bool operator==(const Data &other) const = default;
 
         Data operator+(const Data &other) const;
-        Data operator/(double divisor) const;
+        Data operator/(float divisor) const;
 
         LabeledDistance EuclideanDistance(const Data &other);
     };

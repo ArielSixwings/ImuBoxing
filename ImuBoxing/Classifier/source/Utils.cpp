@@ -13,7 +13,7 @@
 
 namespace classifier
 {
-    void Utils::PrintProgressBar(double percentage)
+    void Utils::PrintProgressBar(float percentage)
     {
         const int barWidth = 70; // Width of the progress bar in characters
 
@@ -48,8 +48,8 @@ namespace classifier
         for (size_t i = 0; std::getline(file, line); i++)
         {
             std::stringstream lineStream(line);
-            std::vector<double> row;
-            double value;
+            std::vector<float> row;
+            float value;
 
             size_t count = 0;
 
@@ -58,14 +58,14 @@ namespace classifier
                 row.push_back(value);
                 count++;
 
-                if (count == 3)
+                if (count == 4)
                     break;
 
                 if (lineStream.peek() == ',')
                     lineStream.ignore();
             }
 
-            if (count != 3)
+            if (count != 4)
             {
                 std::cerr << "Warning: Row does not contain exactly three values. Skipping..." << std::endl;
                 continue;
